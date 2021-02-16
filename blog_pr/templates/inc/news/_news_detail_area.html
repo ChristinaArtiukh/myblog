@@ -1,0 +1,207 @@
+<section class="blog_area single-post-area py-80px section-margin--small">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 posts-list">
+                <div class="single-post row">
+                    <div class="col-lg-3  col-md-3">
+						<div class="blog_info text-right">
+							<div class="post_tag">
+								<a class="active">{{news_detail.category}}</a>
+							</div>
+							<ul class="blog_meta list">
+								<li>
+									<a href="{{news.get_absolute_url}}">{{news_detail.create_date|date:"d.m.Y " }}
+										<i class="lnr lnr-calendar-full"></i>
+									</a>
+								</li>
+								<li>
+									<a href="{{news.get_absolute_url}}">{{news_detail.views}} Просмотров
+										<i class="lnr lnr-eye"></i>
+									</a>
+								</li>
+								<li>
+									<a href="{{news.get_absolute_url}}">
+										{% if comments_count|length < 1 %}
+										Нет комментариев
+										{% elif comments_count|length == 1 %}
+										{{comments_count|length}} комментарий
+										{% elif comments_count|length > 1 and comments_count|length < 5  %}
+										{{comments_count|length}} комментария
+										{%else%}
+										{{comments_count|length}} комментариев
+										{%endif%}
+										<i class="lnr lnr-bubble"></i>
+									</a>
+								</li>
+							</ul>
+						</div>
+					</div>
+                    <div class="col-lg-9 col-md-9 blog_details">
+						<h2>{{news_detail.title}}</h2>
+						<div class="feature-img">
+							{% if news_detail.photo %}
+                            <img class="img-fluid" src="{{news_detail.photo.url}}" alt="">
+							{%endif%}
+                        </div>
+						<br>
+						<p class="excert">{{news_detail.content}}</p>
+					</div>
+                </div>
+                <div class="navigation-area">
+					<div class="row">
+
+						{% for news in prev_news|slice:"1" %}
+						<div class="col-lg-6 col-md-6 col-12 nav-left flex-row d-flex justify-content-start align-items-center">
+							<div class="thumb">
+								<a href="{{news.get_absolute_url}}">
+									<img class="img-fluid" src="{{news.photo.url}}" alt="" height="150" width="150">
+								</a>
+							</div>
+							<div class="arrow">
+								<a href="{{news.get_absolute_url}}">
+									<span class="lnr text-white lnr-arrow-left"></span>
+								</a>
+							</div>
+							<div class="detials">
+								<p>Предыдущая статья</p>
+								<a href="{{news.get_absolute_url}}">
+									<h4>{{news.title}}</h4>
+								</a>
+							</div>
+						</div>
+						{%endfor%}
+
+						{% for news in next_news|slice:"1" %}
+						<div class="col-lg-6 col-md-6 col-12 nav-right flex-row d-flex justify-content-end align-items-center">
+							<div class="detials">
+								<p>Следущая статья</p>
+								<a href="{{news.get_absolute_url}}">
+									<h4>{{news.title}}</h4>
+								</a>
+							</div>
+							<div class="arrow">
+								<a href="{{news.get_absolute_url}}">
+									<span class="lnr text-white lnr-arrow-right"></span>
+								</a>
+							</div>
+							<div class="thumb">
+								<a href="{{news.get_absolute_url}}">
+									<img class="img-fluid" src="{{news.photo.url}}" alt="" height="150" width="150">
+								</a>
+							</div>
+						</div>
+						{%endfor%}
+					</div>
+
+				</div>
+				 <div class="comments-area">
+					{% if comments_count|length < 1  %}
+						<h4>Нет комментариев</h4>
+					 {% elif comments_count|length == 1  %}
+						<h4>{{comments_count|length}} комментарий</h4>
+					{% elif comments_count|length > 1 and comments_count|length < 5  %}
+						<h4>{{comments_count|length}} комментария</h4>
+					{% else%}
+						<h4>{{comments_count|length}} комментариев</h4>
+					{%endif%}
+					{% for comment in comments%}
+					<div class="comment-list">
+						<div class="single-comment justify-content-between d-flex">
+
+							<div class="user justify-content-between d-flex">
+
+								<div class="desc">
+									<h5>
+										<label>{{comment.name}}</label>
+									</h5>
+									<p class="date">{{comment.date|date:"d-m-Y, в G:i"}} </p>
+									<p class="comment">
+										{{comment.comment}}
+									</p>
+								</div>
+
+							</div>
+						</div>
+					</div>
+					{%endfor%}
+				</div>
+				<div class="comment-form">
+					<h4>Написать комментарий</h4>
+					<form  method="post" >
+						{% csrf_token %}
+                        {{ form.non_field.errors }}
+						<div class="form-group form-inline">
+							{% for form in form %}
+							<div class="form-group col-lg-12">
+								{{ form.label_tag }} {{ form }}
+							</div>
+							{%endfor%}
+						</div>
+						<button  class="button button-postComment button--active">Добавить комментарий</button>
+					</form>
+				</div>
+
+
+            </div>
+            <div class="col-lg-4">
+				<div class="blog_right_sidebar">
+					{% for author in author_news%}
+					{%if news_detail.author_id == author.id%}
+					<aside class="single_sidebar_widget author_widget">
+						{%if author.photo%}
+						<img class="author_img rounded-circle" src="{{author.photo.url}}" alt="" height="120" width="120">
+						{%endif%}
+						<h4>{{author.name}} {{author.last_name}}</h4>
+						<div class="br"></div>
+					</aside>
+					{%endif%}
+					{%endfor%}
+
+					<aside class="single_sidebar_widget popular_post_widget">
+						<h3 class="widget_title">Другие статьи</h3>
+					{% for news in news|slice:"10" %}
+					{%if news_detail.id != news.id%}
+						<div class="media post_item">
+							{%if news.photo%}
+							<img src="{{news.photo.url}}" alt="post" height="60" width="100">
+							{%endif%}
+							<div class="media-body">
+								<a href="{{news.get_absolute_url}}">
+									<h3>{{news.title}}</h3>
+								</a>
+								<p>{{news.create_date|date:"d.m.Y "}}</p>
+
+							</div>
+						</div>
+						{%endif%}
+						{%endfor%}
+						<div class="br"></div>
+					</aside>
+					<aside class="single_sidebar_widget ads_widget">
+						<a href="#">
+							<img class="img-fluid" src="img/blog/add.jpg" alt="">
+						</a>
+						<div class="br"></div>
+					</aside>
+					<aside class="single-sidebar-widget newsletter_widget">
+                          <h4 class="widget_title">Подписаться</h4>
+                          <div class="form-group d-flex flex-row">
+                              <div class="input-group">
+                                  <div class="input-group-prepend">
+                                      <div class="input-group-text">
+                                          <i class="fa fa-envelope" aria-hidden="true"></i>
+                                      </div>
+                                  </div>
+                                  <input type="text" class="form-control" id="inlineFormInputGroup" placeholder="Введи почту" onfocus="this.placeholder = ''"
+                                      onblur="this.placeholder = 'Enter email'">
+                              </div>
+                              <a href="#" class="bbtns">Подписаться</a>
+                          </div>
+                          <p class="text-bottom">Ты можешь подписаться в любой момент</p>
+                          <div class="br"></div>
+                      </aside>
+				</div>
+			</div>
+        </div>
+    </div>
+</section>

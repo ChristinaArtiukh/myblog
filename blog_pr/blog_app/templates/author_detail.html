@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block title %} {{author_detail.name}} {{author_detail.last_name}} :: {{block.super}}
+{% endblock %}
+
+{% block content %}
+
+{% include 'inc/author/_author_news_area.html' %}
+
+
+{% endblock %}

@@ -1,0 +1,16 @@
+<section class="blog_area single-post-area py-80px section-margin--small">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 posts-list">
+                <div class="comment-form">
+					<h4>Написать комментарий</h4>
+					<form  method="post">
+						{% csrf_token %}
+						{{form.as_p}}
+						<button  class="button button-postComment button--active">Добавить комментарий</button>
+					</form>
+				</div>
+            </div>
+        </div>
+    </div>
+</section>

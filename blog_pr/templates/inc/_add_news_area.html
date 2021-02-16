@@ -1,0 +1,54 @@
+<section class="checkout_area section-margin--small">
+    <div class="container">
+        <div class="billing_details">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="section-intro pb-60px">
+                        <h2> <span class="section-intro__style">Добавить новость</span></h2>
+                    </div>
+                    <form class="row contact_form" action="{% url 'add_news' %}" method="post">
+                        {% csrf_token %}
+                        {{ form.non_field.errors }}
+                        {{form.as_p}}
+<!--                        <div class="col-md-12 form-group">-->
+<!--                            <input type="text" for="{{form.id_for_label}}" class="form-control"  placeholder="{{form.title.label}}">-->
+<!--                        </div>-->
+<!--                        <div class="col-md-6 form-group p_star">-->
+<!--                            <select class="country_select" for="{{form.id_for_label}}">-->
+<!--                             {% for author in form.author%}-->
+<!--                                <li value="1">{{author}}</li>-->
+<!--                                {%endfor%}-->
+<!--                            </select>-->
+<!--                        </div>-->
+<!--                        <div class="col-md-6 form-group p_star">-->
+<!--                            <select class="country_select" for="{{form.id_for_label}}">-->
+<!--                             {% for category in form.category %}-->
+<!--                                <li value="1">{{category}}</li>-->
+<!--                                {%endfor%}-->
+<!--                            </select>-->
+<!--                        </div>-->
+<!--                        <div class="col-md-6 form-group p_star">-->
+<!--                            <select class="country_select" for="{{form.id_for_label}}">-->
+<!--                             {% for status in form.status %}-->
+<!--                                <li value="1">{{status}}</li>-->
+<!--                                {%endfor%}-->
+<!--                            </select>-->
+<!--                        </div>-->
+<!--&lt;!&ndash;                        <div class="col-md-6 form-group p_star">&ndash;&gt;-->
+<!--&lt;!&ndash;                            <input type="file" class="form-control-file" for="{{form.id_for_label}}" >&ndash;&gt;-->
+<!--&lt;!&ndash;                        </div>&ndash;&gt;-->
+<!--                        <div class="col-md-12 form-group mb-0">-->
+<!--                            <textarea class="form-control" for="{{form.id_for_label}}"  rows="2" placeholder="{{form.content.label}}"></textarea>-->
+<!--                        </div>-->
+<!--                       <div class="col-md-12 form-group mb-0">-->
+<!--                           <br>-->
+<!--                            </div>-->
+                        <div class="col-md-6 form-group p_star">
+                            <button type="submit" class="btn btn-primary">Добавить</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

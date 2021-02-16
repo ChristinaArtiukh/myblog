@@ -1,0 +1,43 @@
+<section class="login_box_area section-margin">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                 {% if messages %}
+                 {% for message in messages %}
+                     <div class="alert alert-warning" role="alert">
+                        {{message}}
+                     </div>
+                 {% endfor%}
+                 {% endif%}
+            </div>
+            <div class="col-lg-6">
+                <div class="login_box_img">
+                    <div class="hover">
+                        <h4>Already have an account?</h4>
+                        <p>There are advances being made in science and technology everyday, and a good example of this is the</p>
+							<a class="button button-account" href="{% url 'login' %}">Войти</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="login_form_inner register_form_inner">
+                    <h3>Регистрация</h3>
+                    <form class="row login_form" method="post" >
+                        {% csrf_token %}
+                        {{ form.non_field.errors }}
+                        <div class="col-md-12 form-group">
+                            {% for form in form %}
+                             <p> {{ form }}</p>
+                            {{ form.label_tag }}
+                            {%endfor%}
+	                    </div>
+                        <div class="col-md-12 form-group">
+                            <button type="submit" value="submit" class="button button-register w-100">Регистрация</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

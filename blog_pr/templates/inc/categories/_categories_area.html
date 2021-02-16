@@ -1,0 +1,26 @@
+<section class="blog_categorie_area">
+    <div class="container">
+      <div class="row">
+
+          {% for category in categories %}
+        <div class="col-sm-6 col-lg-4 mb-4 mb-lg-0">
+ <br>
+            <div class="categories_post">
+                {%if category.photo %}
+                <img class="card-img rounded-0" src="{{category.photo.url}}" alt="post">
+                {%endif%}
+                <div class="categories_details">
+                    <div class="categories_text">
+                        <a href="{{category.get_absolute_url}}">
+                            <h5>{{category.title}}</h5>
+                        </a>
+                        <div class="border_line"></div>
+                        <p>{{category.description}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+          {%endfor%}
+      </div>
+    </div>
+</section>

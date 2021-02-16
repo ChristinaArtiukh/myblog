@@ -1,0 +1,109 @@
+<br><br>
+<section class="blog_area">
+    <div class="container">
+        <div class="section-intro pb-60px">
+            <h2> <span class="section-intro__style">{{category.title}} </span></h2>
+        </div>
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="blog_left_sidebar">
+                    {%for news in news%}
+                    <article class="row blog_item">
+                        <div class="col-md-3">
+                            <div class="blog_info text-right">
+                                <ul class="blog_meta list">
+                                    {%for author in author_list%}
+                                    {%if news.author_id == author.id%}
+                                    <li>
+                                        <a href="{% url 'authors' %}">{{author.name}} {{author.last_name}}
+                                              <i class="lnr lnr-user"></i>
+                                        </a>
+                                    </li>
+                                    {%endif%}
+                                    {%endfor%}
+                                    <li>
+                                        <a href="{{news.get_absolute_url}}">{{news.create_date|date:"d.m.Y " }}
+                                            <i class="lnr lnr-calendar-full"></i>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="{{news.get_absolute_url}}">{{news.views}} Просмотров
+                                            <i class="lnr lnr-eye"></i>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="{{news.get_absolute_url}}">{{news.comments}} Комментариев
+                                            <i class="lnr lnr-bubble"></i>
+                                        </a>
+                                      </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                              <div class="blog_post">
+                                  {%if news.photo%}
+                                  <img src="{{news.photo.url}}" alt="" height="272" width="540">
+                                  {%endif%}
+                                  <div class="blog_details">
+                                      <a href="{{news.get_absolute_url}}">
+                                          <h2>{{news.title}}</h2>
+                                      </a>
+                                      <p>{{news.content|slice:"100"}}</p>
+                                      <a class="button button-blog" href="{{news.get_absolute_url}}">Далее</a>
+                                  </div>
+                              </div>
+                          </div>
+                      </article>
+                    {%endfor%}
+                  </div>
+            </div>
+            <div class="col-lg-4">
+                  <div class="blog_right_sidebar">
+                      <aside class="single_sidebar_widget search_widget">
+                          <div class="input-group">
+                              <input type="text" class="form-control" placeholder="Искать статью">
+                              <span class="input-group-btn">
+                                  <button class="btn btn-default" type="button">
+                                      <i class="lnr lnr-magnifier"></i>
+                                  </button>
+                              </span>
+                          </div>
+                          <!-- /input-group -->
+                          <div class="br"></div>
+                      </aside>
+                      <aside class="single_sidebar_widget popular_post_widget">
+                          <h3 class="widget_title">Популярные статьи</h3>
+                          <div class="media post_item">
+                              <img src="img/blog/popular-post/post1.jpg" alt="post">
+                              <div class="media-body">
+                                  <a href="single-blog.html">
+                                      <h3>Space The Final Frontier</h3>
+                                  </a>
+                                  <p>02 Hours ago</p>
+                              </div>
+                          </div>
+                          <div class="br"></div>
+                      </aside>
+                      <aside class="single-sidebar-widget newsletter_widget">
+                          <h4 class="widget_title">Подписаться</h4>
+                          <div class="form-group d-flex flex-row">
+                              <div class="input-group">
+                                  <div class="input-group-prepend">
+                                      <div class="input-group-text">
+                                          <i class="fa fa-envelope" aria-hidden="true"></i>
+                                      </div>
+                                  </div>
+                                  <input type="text" class="form-control" id="inlineFormInputGroup" placeholder="Введи почту" onfocus="this.placeholder = ''"
+                                      onblur="this.placeholder = 'Enter email'">
+                              </div>
+                              <a href="#" class="bbtns">Подписаться</a>
+                          </div>
+                          <p class="text-bottom">Ты можешь подписаться в любой момент</p>
+                          <div class="br"></div>
+                      </aside>
+                  </div>
+              </div>
+        </div>
+    </div>
+</section>
+
