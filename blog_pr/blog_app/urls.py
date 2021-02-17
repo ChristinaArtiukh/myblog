@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import HomeNewsViews, NewsDetailViews, UserPageView, AuthorListViews, AuthorDetailViews, \
-    CategoryListViews, NewsListViews, CategoryDetailViews, user_logout, user_login, registration, AuthorPageView, AuthorCreateView, \
-    AuthorUpdateView
+    CategoryListViews, NewsListViews, CategoryDetailViews, user_logout, user_login, registration, AuthorPageView,\
+    AuthorCreateView, AuthorUpdateView
 
 
 urlpatterns = [
@@ -13,8 +13,7 @@ urlpatterns = [
     path('author/<slug:slug>', AuthorDetailViews.as_view(), name='author'),
     path('author_profile/', AuthorPageView.as_view(), name='author_profile'),
     path('author_profile/create', AuthorCreateView.as_view(), name='author_create'),
-    path('author_profile/update', AuthorUpdateView.as_view(), name='author_update'),
-
+    path('author_profile/update/<slug:slug>', AuthorUpdateView.as_view(), name='author_update'),
 
     path('categories/', CategoryListViews.as_view(), name='categories'),
     path('categories/<slug:slug>', CategoryDetailViews.as_view(), name='category'),

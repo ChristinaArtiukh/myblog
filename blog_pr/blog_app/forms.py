@@ -30,11 +30,10 @@ class AddCommentsNewsForm(forms.ModelForm):
 
 
 class CreateAuthorForm(forms.ModelForm):
-
     class Meta:
         model = Author
         fields = ('b_day', 'photo', 'about')
-        exclude = ('slug','name', 'last_name',  'author_user',  'email','active', 'number_of_news','age','number_days_of_activity')
+        exclude = ('slug','name', 'last_name',  'author_user',  'email', 'active', 'number_of_news','age','number_days_of_activity')
         labels = {
             'b_day': gl('День рождения'),
             'photo': gl('Фото'),
@@ -43,6 +42,16 @@ class CreateAuthorForm(forms.ModelForm):
         widgets = {
             'about': forms.Textarea(attrs={'cols': 50, 'rows': 10 }),
         }
+
+
+class UpdateAuthorForm(forms.ModelForm):
+    class Meta:
+        model = Author
+        fields = ('name', 'last_name','b_day', 'photo', 'about')
+        widgets = {
+            'about': forms.Textarea(attrs={'cols': 80, 'rows': 10 }),
+        }
+
 
 class LoginUserForm(AuthenticationForm):
     class Meta:

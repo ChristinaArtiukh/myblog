@@ -1,5 +1,6 @@
 from django.core.files.storage import FileSystemStorage
 from django.db import models
+from django.shortcuts import render
 from django.urls import reverse
 from django_unique_slugify import unique_slugify
 from django.contrib.auth.models import AbstractUser
@@ -62,6 +63,9 @@ class Author(models.Model):
 
     def get_absolute_url(self):
         return reverse('author', args=[self.slug])
+
+    def get_absolute_url_author_update(self):
+        return reverse('author_update', args=[self.slug])
 
     def save(self, **kwargs):
         slug_str = "%s" % (self.author_user)

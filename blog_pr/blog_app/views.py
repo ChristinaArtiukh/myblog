@@ -2,10 +2,12 @@ from django.db.models import Count
 from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.contrib import messages
-from django.shortcuts import render, redirect
-from django.views.generic import ListView, DetailView
+from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse_lazy
+from django.views.generic import ListView, DetailView, UpdateView
 from django.views.generic.edit import FormMixin
-from .forms import AddCommentsAuthorForm, AddCommentsNewsForm, CreateAuthorForm, LoginUserForm, RegisteredUserForm
+from .forms import AddCommentsAuthorForm, AddCommentsNewsForm, CreateAuthorForm, LoginUserForm, RegisteredUserForm,\
+    UpdateAuthorForm
 from .models import News, Author, Category, CommentsAuthor, CommentsNews, User
 from django.contrib.auth import login, logout
 
@@ -88,8 +90,8 @@ class AuthorDetailViews(FormMixin, DetailView):
         context['news'] = News.published.filter(author=self.object.pk)
         context['category'] = Category.objects.all()
         context['categories_unique'] = News.published.all().values('category','author_id').order_by('category').distinct()
-        context['comments'] = CommentsAuthor.objects.all().values('name', 'date', 'comment').filter(author_id=self.object.pk).order_by('-date')
-        context['comments_count'] = CommentsAuthor.objects.filter(author_id=self.object.pk).annotate(comments_count=Count('pk')).values_list('comments_count', flat=True)
+        # context['comments'] = CommentsAuthor.objects.all().values('name', 'date', 'comment').filter(author_id=self.object.pk).order_by('-date')
+        # context['comments_count'] = CommentsAuthor.objects.filter(author_id=self.object.pk).annotate(comments_count=Count('pk')).values_list('comments_count', flat=True)
         return context
 
     def add_author_comments(self, request,  *args, **kwargs):
@@ -140,8 +142,22 @@ class AuthorCreateView(FormMixin, ListView):
         return render(request, 'author_create_page.html', {'form': form})
 
 
-class AuthorUpdateView(ListView):
-    pass
+class AuthorUpdateView(UpdateView):
+    model = Author
+    template_name = 'author_update_page.html'
+    form_class = UpdateAuthorForm
+    success_url = reverse_lazy('author_profile')
+
+    def update_author_info(self, request, *args, **kwargs):
+        author_info = request.slug
+        if request.method == 'POST':
+            form = UpdateAuthorForm(request.POST, request.FILES, instance=author_info)
+            if form.is_valid():
+                form.save()
+                return redirect('author_profile')
+        else:
+            form = CreateAuthorForm()
+        return render(request, 'author_create_page.html', {'form': form})
 
 
 class CategoryListViews(ListView):
