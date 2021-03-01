@@ -4,9 +4,11 @@
             <div class="col-lg-8 posts-list">
                 <div class="single-post row">
                     <div class="col-lg-9 col-md-9 blog_details">
-						<h2>{{author_detail.name}} {{author_detail.last_name}}</h2>
+						{%for author_detail in author_detail%}
+						<h2>{{author_detail.first_name}} {{author_detail.last_name}}</h2>
+						{%endfor%}
 						<br>
-						<p class="excert">{{author_detail.about}}</p>
+						{{author_info.about}}
 					</div>
                 </div>
 				<div class="comments-area">
@@ -20,6 +22,9 @@
 						<h4>{{comments_count|length}} комментариев</h4>
 					{%endif%}
 					{% for comment in comments%}
+					{%for user in user_all%}
+
+					{%if comment.author_name == user.id %}
 					<div class="comment-list">
 						<div class="single-comment justify-content-between d-flex">
 
@@ -27,7 +32,11 @@
 
 								<div class="desc">
 									<h5>
-										<label>{{comment.name}}</label>
+										{%if user.first_name%}
+										<label>{{user.first_name}}</label>
+										{%else%}
+										<label>{{user.username}}</label>
+										{%endif%}
 									</h5>
 									<p class="date">{{comment.date|date:"d-m-Y, в G:i"}} </p>
 									<p class="comment">
@@ -38,6 +47,8 @@
 							</div>
 						</div>
 					</div>
+					{%endif%}
+					{%endfor%}
 					{%endfor%}
 				</div>
                 <div class="comment-form">
@@ -48,7 +59,7 @@
 						<div class="form-group form-inline">
 							{% for form in form%}
 							<div class="form-group col-lg-12">
-								{{ form.label_tag }} {{ form }}
+								{{ form }}
 							</div>
 							{%endfor%}
 						</div>
@@ -62,27 +73,31 @@
 				<div class="blog_right_sidebar">
 
 					<aside class="single_sidebar_widget author_widget">
+						{%for author_detail in author_detail%}
 						{%if author_detail.photo%}
 						<img class="author_img rounded-circle" src="{{author_detail.photo.url}}" alt="" height="120" width="120">
 						{%endif%}
+						{%endfor%}
 						<div class="br"></div>
 					</aside>
                     <aside class="single_sidebar_widget post_category_widget">
                           <h4 class="widget_title">Категории автора</h4>
                           <ul class="list cat-list">
                               {%for news in categories_unique %}
-                                {%if author_detail.id == news.author_id %}
-                                {%for category in category %}
-                                {% if category.id == news.category%}
+                                {%if author_info.id == news.author_id %}
+							  	{%for category_count in category_count%}
+                                {% if category_count.pk == news.category%}
                               <li>
-                                  <a href="{{category.get_absolute_url}}" class="d-flex justify-content-between">
-                                      <p>{{category.title}}</p>
+                                  <a href="{{category_count.get_absolute_url}}" class="d-flex justify-content-between">
+                                      <p>{{category_count.title}}</p>
+									  		{{category_count.count}}
                                   </a>
                               </li>
                                 {%endif%}
                                 {%endfor%}
                                 {%endif%}
                                 {%endfor%}
+
                           </ul>
                           <div class="br"></div>
                       </aside>

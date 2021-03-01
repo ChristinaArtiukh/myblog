@@ -1,0 +1,46 @@
+<section class="blog_area single-post-area py-80px section-margin--small">
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 posts-list">
+				<div class="single-post row">
+					<div class="col-lg-9 col-md-9 blog_details">
+						<h2>Привет, {{user.first_name}} {{user.last_name}}!</h2>
+						<br>
+						{% if user.b_day|date:"Y-m-d" != '9999-01-01'%}
+						<p>Дата рождения: {{user.b_day}}</p>
+						{%else%}
+						<p></p>
+						{%endif%}
+						{% for author in profile %}
+						{% if author.maker_id == user.id %}
+						<p>Краткая информация: </p>
+						<p>{{author.about}}</p>
+						{%endif%}
+						{%endfor%}
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-4">
+				<div class="blog_right_sidebar">
+					<aside class="single_sidebar_widget author_widget">
+						{%if user.photo%}
+						<img class="author_img rounded-circle" src="{{user.photo.url}}" alt="" height="120" width="120">
+						{%endif%}
+					</aside>
+					<br><br>
+					<aside class="single_sidebar_widget author_widget">
+						{% for profile in profile %}
+						{%if user.author_status == 'author'%}
+						<a href="{{ profile.get_absolute_url_update }}"><button class="button button-subscribe mr-auto mb-1" type="submit">Изменить</button></a>
+						<br><br>
+						<a href="{{ profile.get_absolute_url_add_news }}"><button class="button button-subscribe mr-auto mb-1" type="submit">Добавить новость</button></a>
+						{%else%}
+						<a href="{% url 'update_info' %}"><button class="button button-subscribe mr-auto mb-1" type="submit">Изменить</button></a>
+						{%endif%}
+						{% endfor %}
+					</aside>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>

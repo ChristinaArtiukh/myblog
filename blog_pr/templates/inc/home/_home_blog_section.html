@@ -1,3 +1,4 @@
+{% load static %}
 <br>
 <section class="blog">
     <div class="container">
@@ -11,30 +12,32 @@
               <div class="card-blog__img">
                 {% if news.photo %}
                 <img class="card-img rounded-0" src="{{news.photo.url}}" height="217" width="350" alt="">
-                {% else %}
-                <img class="card-img rounded-0" src="media/additional/no_photo_news.png" alt="">
-                {% endif %}
+                  {% else %}
+                  <img class="img-fluid" src="{% static 'img/no_photo.png' %}" alt="">
+                  {%endif%}
               </div>
               <div class="card-body">
                 <ul class="card-blog__info">
                   {% for author in author_list %}
-                  {% if news.author_id == author.id %}
-                  <li><a href="{{author.get_absolute_url}}">{{author.name}} {{author.last_name}} </a></li>
+                    {% for info in author_info %}
+                    {% if news.author_id == author.id %}
+                  <li><a href="{{ author.get_absolute_url }}">{{info.first_name}} {{info.last_name}} </a></li>
                   <li><a href="{{news.get_absolute_url}}">
-                       {% for comments_count in comments_count %}
-                            {% if comments_count.news_id == news.id %}
-                                {% if  comments_count|length == 1 %}
-                      <i class="ti-comments-smiley"></i> {{comments_count|length}}
-                      {% elif comments_count|length > 1 and comments_count|length < 5  %}
-                      <i class="ti-comments-smiley"></i>{{comments_count|length}} комментария
-                      {%else%}
-                       <i class="ti-comments-smiley"></i> {{comments_count|length}} комментариев
-                      {%endif%}
-                      {%endif%}
+                       {% for comments in comments_count %}
+                            {% if comments.pk == news.id %}
+                                {% if  comments.count == 1 %}
+                                    <i class="ti-comments-smiley"></i> {{comments.count}}
+                                {% elif comments.count > 1 and comments.count < 5  %}
+                                    <i class="ti-comments-smiley"></i>{{comments.count}} комментария
+                                {%else%}
+                                    <i class="ti-comments-smiley"></i> {{comments.count}} комментариев
+                                {%endif%}
+                            {%endif%}
                       {%endfor%}
                      </a></li>
                   {% endif %}
                   {% endfor %}
+                    {% endfor %}
                 </ul>
                 <h4 class="card-blog__title"><a href="{{news.get_absolute_url}}">{{news.title}}</a></h4>
                 <p>{{news.content|slice:":100"}}</p>

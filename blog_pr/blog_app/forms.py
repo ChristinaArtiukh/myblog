@@ -1,6 +1,6 @@
 from django import forms
 from django.http import request
-from .models import News, CommentsAuthor, CommentsNews, Author, User
+from .models import News, CommentsAuthor, CommentsNews, User, AuthorInfo
 from django.utils.translation import gettext_lazy as gl
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 
@@ -8,11 +8,9 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 class AddCommentsAuthorForm(forms.ModelForm):
     class Meta:
         model = CommentsAuthor
-        fields = ('author_name',  'comment')
-        exclude = ['author']
+        fields = ('comment', )
+        exclude = ['author_name', 'author']
         widgets = {
-            'name': forms.TextInput(attrs={'class':"form-control"}),
-            'email': forms.TextInput(attrs={'class': "form-control"}),
             'comment': forms.Textarea(attrs={'cols': 100, 'rows': 20, 'class': "form-control"}),
         }
 
@@ -20,23 +18,33 @@ class AddCommentsAuthorForm(forms.ModelForm):
 class AddCommentsNewsForm(forms.ModelForm):
     class Meta:
         model = CommentsNews
-        fields = ('author_name', 'comment')
-        exclude = ['news']
+        fields = ('comment', )
+        exclude = ['author_name', 'news', 'name']
         widgets = {
-            'name': forms.TextInput(attrs={'class':"form-control"}),
-            'email': forms.TextInput(attrs={'class': "form-control"}),
             'comment': forms.Textarea(attrs={'cols': 100, 'rows': 20, 'class': "form-control"}),
+        }
+
+
+class UserAddInfoForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ('b_day', 'photo')
+        exclude = ('username', 'first_name', 'last_name', 'email')
+        labels = {
+            'photo': gl('Фото'),
+            'b_day': gl('День рождения'),
+        }
+        widgets = {
+            'about': forms.Textarea(attrs={'cols': 50, 'rows': 10 }),
         }
 
 
 class CreateAuthorForm(forms.ModelForm):
     class Meta:
-        model = Author
-        fields = ('b_day', 'photo', 'about')
-        exclude = ('slug','name', 'last_name',  'author_user',  'email', 'active', 'number_of_news','age','number_days_of_activity')
+        model = AuthorInfo
+        fields = ('about',)
+        exclude = ('slug', 'name', 'maker')
         labels = {
-            'b_day': gl('День рождения'),
-            'photo': gl('Фото'),
             'about': gl('О вас'),
         }
         widgets = {
@@ -44,10 +52,17 @@ class CreateAuthorForm(forms.ModelForm):
         }
 
 
+class UpdateUserForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ('first_name', 'last_name', 'b_day', 'photo')
+
+
 class UpdateAuthorForm(forms.ModelForm):
     class Meta:
-        model = Author
-        fields = ('name', 'last_name','b_day', 'photo', 'about')
+        model = AuthorInfo
+        fields = ('about',)
+        exclude = ('maker',)
         widgets = {
             'about': forms.Textarea(attrs={'cols': 80, 'rows': 10 }),
         }
@@ -83,10 +98,30 @@ class RegisteredUserForm(UserCreationForm):
         }
 
 
-# class AddNewsForm(forms.ModelForm):
-#     class Meta:
-#         model = News
-#         fields = '__all__'
+class AddNewsForm(forms.ModelForm):
+    class Meta:
+        model = News
+        fields = ('title', 'photo', 'category', 'content')
+        exclude = ('maker', 'status', 'slug', 'author')
+        labels = {
+            'title': gl('Название'),
+            'content': gl('Контент'),
+            'photo': gl('Фото'),
+            'category': gl('Категория'),
+        }
+        widgets = {
+            'content': forms.Textarea(attrs={'cols': 80, 'rows': 10 }),
+        }
+
+
+class UpdateNewsForm(forms.ModelForm):
+    class Meta:
+        model = News
+        fields = ('title', 'photo', 'category', 'content')
+        exclude = ('maker', 'status', 'slug', 'author')
+        widgets = {
+            'content': forms.Textarea(attrs={'cols': 80, 'rows': 10 }),
+    }
 
 # class AddNewsForm(forms.ModelForm):
 #     class Meta:

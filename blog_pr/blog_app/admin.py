@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import News, Author, Category, CommentsAuthor, User
+from .models import News, Category, CommentsAuthor, User, AuthorInfo, CommentsNews
 
 
 @admin.register(User)
@@ -7,10 +7,10 @@ class UserAdmin(admin.ModelAdmin):
     list_display = ('username',)
 
 
-@admin.register(Author)
-class AuthorAdmin(admin.ModelAdmin):
-    list_display = ('name',)
-    prepopulated_fields = {'slug': ('name', 'last_name',)}
+@admin.register(AuthorInfo)
+class AuthorInfoAdmin(admin.ModelAdmin):
+    list_display = ('maker',)
+    prepopulated_fields = {'slug': ('maker',)}
 
 
 @admin.register(News)
@@ -27,5 +27,9 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(CommentsAuthor)
 class CommentsAuthorAdmin(admin.ModelAdmin):
-    list_display = ('author_name',)
+    list_display = ('comment',)
 
+
+@admin.register(CommentsNews)
+class CommentsNewsAdmin(admin.ModelAdmin):
+    list_display = ('comment',)

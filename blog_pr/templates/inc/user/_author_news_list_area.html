@@ -1,0 +1,67 @@
+{% if user.author_status == 'author' %}
+<section class="product_description_area">
+    <div class="container">
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="review-tab" data-toggle="tab"  role="tab" aria-controls="review"
+                   aria-selected="false">Мои статьи</a>
+            </li>
+        </ul>
+        {%for news in news_list %}
+        <div class="tab-content" id="myTabContent">
+
+            <div class="tab-pane fade show active" id="review" role="tabpanel" aria-labelledby="review-tab">
+
+                <div class="row">
+
+                    <div class="col-lg-12">
+
+                        <div class="navigation-area">
+
+                            <div class="row">
+
+                                <div class="col-lg-8 col-md-8 col-8 nav-left flex-row d-flex justify-content-start align-items-center">
+                                    <div class="thumb">
+                                        <a href="{{news.get_absolute_url}}">
+                                            {%if news.photo %}
+                                            <img class="img-fluid" src="{{news.photo.url}}" alt="" height="120" width="120">
+                                            {%endif%}
+                                        </a>
+                                    </div>
+                                    <div class="arrow">
+                                        <a href="#">
+                                            <span class="lnr text-white lnr-arrow-left"></span>
+                                        </a>
+                                    </div>
+                                    <div class="detials">
+                                        <a href="{{news.get_absolute_url}}">
+                                            <h4>{{news.title}}</h4>
+                                        </a>
+                                    </div>
+
+                                </div>
+                                <div class="col-lg-4 col-md-4 col-4 nav-right flex-row d-flex justify-content-end align-items-center">
+                                    <div class="detials">
+                                        <a href="{{news.get_absolute_url_update_news}}"><button class="button button-subscribe mr-auto mb-1" type="submit">Изменить</button></a>
+                                    </div>
+                                    <div class="arrow">
+                                        <a href="#">
+                                            <span class="lnr text-white lnr-arrow-right"></span>
+                                        </a>
+                                    </div>
+                                    <div class="detials">
+                                        <a href="{% url 'update_info' %}"><button class="button button-subscribe mr-auto mb-1" type="submit">Удалить</button></a>
+                                    </div>
+                                </div>
+                                <br>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>{%endfor%}
+    </div>
+</section>
+{%endif%}

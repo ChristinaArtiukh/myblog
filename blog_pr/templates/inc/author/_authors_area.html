@@ -12,15 +12,22 @@
                 {%endif%}
                 <div class="categories_details">
                     <div class="categories_text">
-                        <a href="{{author.get_absolute_url}}">
-                            <h5>{{author.name}} {{author.last_name}}</h5>
-                        </a>
+                        {%endfor%}
+                        {%for author_info in author_info %}
+
+                        <a href="{{author_info.get_absolute_url}}">
+                            <h5>{{user.first_name}} {{user.last_name}}</h5>
+
+</a>
+                        {%endfor%}
+
                         <div class="border_line"></div>
                     </div>
                 </div>
+
             </div>
         </div>
-          {%endfor%}
+
       </div>
     </div>
 </section>

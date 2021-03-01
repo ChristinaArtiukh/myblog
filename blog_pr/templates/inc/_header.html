@@ -13,28 +13,22 @@
           <div class="collapse navbar-collapse offset" id="navbarSupportedContent">
             <ul class="nav navbar-nav menu_nav ml-auto mr-auto">
               <li class="nav-item active"><a class="nav-link" href="{%url 'home' %}">Главная</a></li>
-              {% if user.author_status == 'author' %}
-              <li class="nav-item"><a class="nav-link" href="{%url 'author_profile' %}">Профиль</a></li>
-              <li class="nav-item"><a class="nav-link" href="{% url 'categories' %}">Мои статьи</a></li>
-              <li class="nav-item"><a class="nav-link" href="#">Добавить статью</a></li>
-
-              {%elif request.user.is_authenticated%}
-              <li class="nav-item submenu dropdown">
-                <a class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-                  aria-expanded="false">Блог</a>
-                <ul class="dropdown-menu">
-                  <li class="nav-item"><a class="nav-link" href="{% url 'news_list' %}">Новости</a></li>
-                  <li class="nav-item"><a class="nav-link" href="{% url 'categories' %}">Категории</a></li>
-                  <li class="nav-item"><a class="nav-link" href="{% url 'authors' %}">Авторы</a></li>
-                </ul>
-              </li>
-              <li class="nav-item"><a class="nav-link" href="{% url 'user_info' %}">Профиль</a></li>
-              {%else%}
+              {%if request.user.is_authenticated%}
+                <li class="nav-item"><a class="nav-link" href="{%url 'profile' %}">Профиль</a></li>
+                <li class="nav-item submenu dropdown">
+                    <a  class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                       aria-expanded="false">Блог</a>
+                    <ul class="dropdown-menu">
+                        <li class="nav-item"><a class="nav-link" href="{%url 'news_list'%}">Новости</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'categories' %}">Категории</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'authors' %}">Авторы</a></li>
+                    </ul>
+                </li>
+              {%else %}
               <li class="nav-item"><a class="nav-link" href="{%url 'news_list'%}">Новости</a></li>
               <li class="nav-item"><a class="nav-link" href="{% url 'categories' %}">Категории</a></li>
-              <li class="nav-item"><a class="nav-link" href="{% url 'authors' %}">Авторы</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'authors' %}">Авторы</a></li>
               {%endif%}
-
 
 
               <li class="nav-item"><a class="nav-link" href="contact.html">Контакты</a></li>

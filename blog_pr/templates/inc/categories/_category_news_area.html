@@ -13,13 +13,15 @@
                             <div class="blog_info text-right">
                                 <ul class="blog_meta list">
                                     {%for author in author_list%}
+                                    {% for user in user_list %}
                                     {%if news.author_id == author.id%}
                                     <li>
-                                        <a href="{% url 'authors' %}">{{author.name}} {{author.last_name}}
+                                        <a href="{% url 'authors' %}">{{user.first_name}} {{user.last_name}}
                                               <i class="lnr lnr-user"></i>
                                         </a>
                                     </li>
                                     {%endif%}
+                                    {%endfor%}
                                     {%endfor%}
                                     <li>
                                         <a href="{{news.get_absolute_url}}">{{news.create_date|date:"d.m.Y " }}
@@ -31,11 +33,17 @@
                                             <i class="lnr lnr-eye"></i>
                                         </a>
                                     </li>
-                                    <li>
-                                        <a href="{{news.get_absolute_url}}">{{news.comments}} Комментариев
-                                            <i class="lnr lnr-bubble"></i>
-                                        </a>
-                                      </li>
+                                    {%for count in comments_count %}
+                                    {% if count.pk == news.id %}
+                                    {% if  count.count == 1 %}
+                                    {{count.count}} комментарий  <i class="lnr lnr-bubble"></i>
+                                    {% elif count.count > 1 and count.count < 5  %}
+                                    {{count.count}} комментария  <i class="lnr lnr-bubble"></i>
+                                    {%else%}
+                                    {{count.count}} комментариев  <i class="lnr lnr-bubble"></i>
+                                    {%endif%}
+                                    {%endif%}
+                                    {%endfor%}
                                 </ul>
                             </div>
                         </div>
