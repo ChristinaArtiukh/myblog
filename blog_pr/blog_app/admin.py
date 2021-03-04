@@ -4,7 +4,8 @@ from .models import News, Category, CommentsAuthor, User, AuthorInfo, CommentsNe
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('username',)
+    list_display = ('username', 'author_status', 'i_am_author')
+    ordering = ('-date_joined', )
 
 
 @admin.register(AuthorInfo)
@@ -15,7 +16,7 @@ class AuthorInfoAdmin(admin.ModelAdmin):
 
 @admin.register(News)
 class NewsAdmin(admin.ModelAdmin):
-    list_display = ('title',)
+    list_display = ('title', 'status')
     prepopulated_fields = {'slug': ('title',)}
 
 

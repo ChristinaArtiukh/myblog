@@ -1,6 +1,6 @@
 from django import forms
 from django.http import request
-from .models import News, CommentsAuthor, CommentsNews, User, AuthorInfo
+from .models import News, CommentsAuthor, CommentsNews, User, AuthorInfo, Category
 from django.utils.translation import gettext_lazy as gl
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 
@@ -26,9 +26,12 @@ class AddCommentsNewsForm(forms.ModelForm):
 
 
 class UserAddInfoForm(forms.ModelForm):
+    # preferences = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, choices=Category)
+
+
     class Meta:
         model = User
-        fields = ('b_day', 'photo')
+        fields = ('b_day', 'photo', 'preferences')
         exclude = ('username', 'first_name', 'last_name', 'email')
         labels = {
             'photo': gl('Фото'),
@@ -55,7 +58,9 @@ class CreateAuthorForm(forms.ModelForm):
 class UpdateUserForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ('first_name', 'last_name', 'b_day', 'photo')
+        fields = ('first_name', 'last_name', 'b_day', 'photo', 'preferences')
+
+    # preferences_formset  ry(model=Category)
 
 
 class UpdateAuthorForm(forms.ModelForm):
@@ -122,6 +127,15 @@ class UpdateNewsForm(forms.ModelForm):
         widgets = {
             'content': forms.Textarea(attrs={'cols': 80, 'rows': 10 }),
     }
+
+
+class ChangeStatusNewsForm(forms.ModelForm):
+    class Meta:
+        model = News
+        exclude = ('maker', 'status', 'slug', 'author', 'title', 'photo', 'category', 'content')
+        widgets = {
+            'content': forms.Textarea(attrs={'cols': 80, 'rows': 10 }),
+        }
 
 # class AddNewsForm(forms.ModelForm):
 #     class Meta:

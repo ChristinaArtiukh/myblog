@@ -21,7 +21,9 @@
                   {% for author in author_list %}
                     {% for info in author_info %}
                     {% if news.author_id == author.id %}
+                    {% if info.id == author.maker_id %}
                   <li><a href="{{ author.get_absolute_url }}">{{info.first_name}} {{info.last_name}} </a></li>
+                    {%endif%}
                   <li><a href="{{news.get_absolute_url}}">
                        {% for comments in comments_count %}
                             {% if comments.pk == news.id %}
@@ -36,6 +38,7 @@
                       {%endfor%}
                      </a></li>
                   {% endif %}
+
                   {% endfor %}
                     {% endfor %}
                 </ul>

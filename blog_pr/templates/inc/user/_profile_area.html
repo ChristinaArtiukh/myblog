@@ -29,15 +29,22 @@
 					</aside>
 					<br><br>
 					<aside class="single_sidebar_widget author_widget">
-						{% for profile in profile %}
-						{%if user.author_status == 'author'%}
-						<a href="{{ profile.get_absolute_url_update }}"><button class="button button-subscribe mr-auto mb-1" type="submit">Изменить</button></a>
-						<br><br>
-						<a href="{{ profile.get_absolute_url_add_news }}"><button class="button button-subscribe mr-auto mb-1" type="submit">Добавить новость</button></a>
-						{%else%}
-						<a href="{% url 'update_info' %}"><button class="button button-subscribe mr-auto mb-1" type="submit">Изменить</button></a>
+						{%if request.user.is_authenticated%}
+							{%if user.i_am_author == False %}
+								<a href="{% url 'update_info' %}"><button class="button button-subscribe mr-auto mb-1" type="submit">Изменить</button></a>
+							{%endif%}
+							{% for profile in profile %}
+								{%if user.id == profile.maker_id %}
+									{%if user.i_am_author == True %}
+									<a href="{{ profile.get_absolute_url_update }}"><button class="button button-subscribe mr-auto mb-1" type="submit">Изменить</button></a>
+										{% if user.author_status == 'author' %}
+										<br><br>
+										<a href="{{ profile.get_absolute_url_add_news }}"><button class="button button-subscribe mr-auto mb-1" type="submit">Добавить новость</button></a>
+										{%endif%}
+									{%endif%}
+								{%endif%}
+							{%endfor%}
 						{%endif%}
-						{% endfor %}
 					</aside>
 				</div>
 			</div>

@@ -1,13 +1,15 @@
 from django.db.models import Count
 from django.db.models import Q
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, DetailView, UpdateView
+from django.views.generic.base import View
+from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.edit import FormMixin
 from .forms import AddCommentsAuthorForm, AddCommentsNewsForm, LoginUserForm, RegisteredUserForm, CreateAuthorForm, \
-    UserAddInfoForm, UpdateUserForm, UpdateAuthorForm, AddNewsForm, UpdateNewsForm
+    UserAddInfoForm, UpdateUserForm, UpdateAuthorForm, AddNewsForm, UpdateNewsForm, ChangeStatusNewsForm
 from .models import News, Category, CommentsNews, User, AuthorInfo, CommentsAuthor
 from django.contrib.auth import login, logout
 
@@ -60,7 +62,7 @@ class NewsDetailViews(FormMixin, DetailView):
         context['next_news'] = News.published.filter(category=self.object.category,
                                                      ).filter(create_date__gt=self.object.create_date,
                                                               ).filter(~Q(id=self.object.id))
-        context['user_news'] = User.objects.filter(author_status='author')
+        context['user_news'] = User.objects.filter(author_status='author', pk=self.object.maker_id)
         context['users_all'] = User.objects.all()
         context['author_news'] = AuthorInfo.objects.all()
         context['comments'] = CommentsNews.objects.all().values('comment',
@@ -87,14 +89,15 @@ class NewsDetailViews(FormMixin, DetailView):
 
 
 class AuthorListViews(ListView):
-    model = AuthorInfo
+    model = User
     template_name = 'authors.html'
     context_object_name = 'author_info'
+    queryset = User.objects.filter(author_status='author')
     paginate_by = 9
 
     def get_context_data(self, **kwargs):
         context = super(AuthorListViews, self).get_context_data(**kwargs)
-        context['author_list'] = User.objects.filter(author_status='author')
+        context['slug'] = AuthorInfo.objects.all()
         return context
 
 
@@ -106,7 +109,7 @@ class AuthorDetailViews(FormMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(AuthorDetailViews, self).get_context_data(**kwargs)
-        context['author_detail'] = User.objects.filter(author_status='author')
+        context['author_detail'] = User.objects.filter(author_status='author', pk=self.object.maker_id)
         context['user_all'] = User.objects.all()
         context['news'] = News.published.filter(author=self.object.pk)
         context['categories_unique'] = News.published.all().values('category','author_id').order_by('category').distinct()
@@ -137,11 +140,11 @@ class ProfilePageView(ListView):
     model = AuthorInfo
     template_name = 'profile_page.html'
     context_object_name = 'profile'
-    paginate_by = 9
 
     def get_context_data(self, **kwargs):
         context = super(ProfilePageView, self).get_context_data(**kwargs)
         context['news_list'] = News.published.all()
+        context['author'] = AuthorInfo.objects.all()
         return context
 
 
@@ -178,6 +181,20 @@ def add_profile_info(request):
         return render(request, 'create_info_page.html', {'form_one': form_one})
 
 
+class ChangeStatusNewsView(UpdateView):
+    model = News
+    template_name = 'change_status_news.html'
+    form_class = ChangeStatusNewsForm
+    queryset = News.published.all()
+    success_url = reverse_lazy('profile')
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        self.object.status = 'draft'
+        self.object.save(update_fields=('status',))
+        return redirect('profile')
+
+
 class UserUpdateView(UpdateView):
     model = User
     template_name = 'update_info_page.html'
@@ -192,10 +209,7 @@ class AuthorUpdateView(UpdateView):
     model = AuthorInfo
     template_name = 'author_update_page.html'
     form_class = UpdateAuthorForm
-
-    # def get_success_url(self):
-    #     view_name = 'update_mymodel'
-    #     return reverse(view_name, kwargs={'model_name_slug': self.object.slug})
+    success_url = reverse_lazy('update_info')
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -229,6 +243,11 @@ class NewsUpdateView(UpdateView):
     template_name = 'news_update_page.html'
     form_class = UpdateNewsForm
     success_url = reverse_lazy('profile')
+
+    def get_success_url(self):
+        # view_name = имя модели
+        view_name = 'news'
+        return reverse(view_name, kwargs={'slug': self.object.slug})
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()

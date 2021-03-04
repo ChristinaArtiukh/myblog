@@ -17,12 +17,14 @@
                                 <ul class="blog_meta list">
                                     {%for author in author_list%}
                                     {%for info in author_info%}
-                                    {%if news.author_id == author.id%}
+                                    {%if news.author_id == author.id %}
+                                    {% if author.maker_id == info.id %}
                                     <li>
                                         <a href="{{author.get_absolute_url}}">{{info.first_name}} {{info.last_name}}
                                               <i class="lnr lnr-user"></i>
                                         </a>
                                     </li>
+                                    {%endif%}
                                     {%endif%}
                                     {%endfor%}
                                     {%endfor%}

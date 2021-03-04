@@ -48,6 +48,18 @@
                         </div>
 						<br>
 						<p class="excert">{{news_detail.content}}</p>
+						{%for author_news in author_news%}
+						{%if author_news.id == news_detail.author_id%}
+						{% if user.id == author_news.maker_id %}
+
+						<br><br>
+						<a href="{{news_detail.get_absolute_url_update_news}}"><button class="button button-subscribe mr-auto mb-1" type="submit">Изменить</button></a>
+						<br><br>
+						<a href="{{news_detail.get_absolute_url_delete_news}}"><button class="button button-subscribe mr-auto mb-1" type="submit">Удалить</button></a>
+
+						{%endif%}
+						{%endif%}
+						{%endfor%}
 					</div>
                 </div>
                 <div class="navigation-area">

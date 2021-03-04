@@ -1,0 +1,21 @@
+<section class="checkout_area section-margin--small">
+    <div class="container">
+        <div class="returning_customer">
+            <h3>Удаление статьи</h3>
+            <p>Статья более не будет доступна пользователям.</p>
+            <br><br>
+            <form  method="post" class="row contact_form">
+                {% csrf_token %}
+                {{ form.non_field.errors }}
+                <div class="col-md-12 form-group">
+                    <div class="form-group form-inline">
+                        {% for form in form%}
+                        {%endfor%}
+                    </div>
+                    <p>Вы уверены?</p>
+                    <button class="button button-coupon" >Удалить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>

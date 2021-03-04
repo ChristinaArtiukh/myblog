@@ -2,7 +2,7 @@ from django.urls import path
 from .views import HomeNewsViews, NewsDetailViews, ProfilePageView,\
     CategoryListViews, NewsListViews, CategoryDetailViews, user_logout, user_login, registration, \
     add_profile_info, AuthorListViews, AuthorDetailViews, UserUpdateView, AuthorUpdateView, AddNewsView, \
-    NewsUpdateView
+    NewsUpdateView, ChangeStatusNewsView
 
 
 urlpatterns = [
@@ -27,5 +27,6 @@ urlpatterns = [
     # path('profile/add_news/', add_news, name='add_news'),
     path('profile/add_news/<slug:slug>', AddNewsView.as_view(), name='add_news'),
     path('profile/update_news/<slug:slug>', NewsUpdateView.as_view(), name='update_news'),
+    path('profile/delete_news/<slug:slug>', ChangeStatusNewsView.as_view(), name='delete_news'),
 
 ]

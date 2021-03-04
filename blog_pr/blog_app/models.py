@@ -1,11 +1,7 @@
-from django.core.files.storage import FileSystemStorage
 from django.db import models
-from django.shortcuts import render
 from django.urls import reverse
 from pytils.translit import slugify
-from django_unique_slugify import unique_slugify
 from django.contrib.auth.models import AbstractUser
-from django.conf import settings
 
 
 class User(AbstractUser):
@@ -55,6 +51,9 @@ class AuthorInfo(models.Model):
     def get_absolute_url_add_news(self):
         return reverse('add_news', args=[self.slug])
 
+    def get_absolute_url_profile(self):
+        return reverse('profile', args=[self.slug])
+
     def save_slug(self, *args, **kwargs):
         self.slug = slugify(self.maker)
         super().save(*args, **kwargs)
@@ -96,6 +95,9 @@ class News(models.Model):
 
     def get_absolute_url(self):
         return reverse('news', args=[self.slug])
+
+    def get_absolute_url_delete_news(self):
+        return reverse('delete_news', args=[self.slug])
 
     def save_news(self, *args, **kwargs):
         self.slug = slugify(self.title)

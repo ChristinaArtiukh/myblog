@@ -12,14 +12,16 @@
                         <div class="col-md-3">
                             <div class="blog_info text-right">
                                 <ul class="blog_meta list">
-                                    {%for author in author_list%}
+                                    {% for author in author_list %}
                                     {% for user in user_list %}
-                                    {%if news.author_id == author.id%}
+                                    {% if news.author_id == author.id %}
+                                    {% if user.id == author.maker_id %}
                                     <li>
                                         <a href="{% url 'authors' %}">{{user.first_name}} {{user.last_name}}
                                               <i class="lnr lnr-user"></i>
                                         </a>
                                     </li>
+                                    {%endif%}
                                     {%endif%}
                                     {%endfor%}
                                     {%endfor%}

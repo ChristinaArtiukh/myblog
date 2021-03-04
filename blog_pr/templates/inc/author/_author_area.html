@@ -51,13 +51,14 @@
 					{%endfor%}
 					{%endfor%}
 				</div>
-                <div class="comment-form">
+				{%if request.user.is_authenticated%}
+				<div class="comment-form">
 					<h4>Написать комментарий</h4>
 					<form  method="post" >
 						{% csrf_token %}
-                        {{ form.non_field.errors }}
+						{{ form.non_field.errors }}
 						<div class="form-group form-inline">
-							{% for form in form%}
+							{% for form in form %}
 							<div class="form-group col-lg-12">
 								{{ form }}
 							</div>
@@ -66,12 +67,15 @@
 						<button  class="button button-postComment button--active">Добавить комментарий</button>
 					</form>
 				</div>
-
-
+				{%else%}
+				<div class="comment-form">
+					<h4>Написать комментарий</h4>
+					<a href="{%url 'login'%}">Войдите</a> или <a href="{%url 'registration'%}">Зарегистрируйтесь</a> для написания комментария
+				</div>
+				{% endif%}
             </div>
             <div class="col-lg-4">
 				<div class="blog_right_sidebar">
-
 					<aside class="single_sidebar_widget author_widget">
 						{%for author_detail in author_detail%}
 						{%if author_detail.photo%}
@@ -83,20 +87,20 @@
                     <aside class="single_sidebar_widget post_category_widget">
                           <h4 class="widget_title">Категории автора</h4>
                           <ul class="list cat-list">
-                              {%for news in categories_unique %}
-                                {%if author_info.id == news.author_id %}
-							  	{%for category_count in category_count%}
-                                {% if category_count.pk == news.category%}
+                              {% for news in categories_unique %}
+                                {% if author_info.id == news.author_id %}
+							  	{% for category_count in category_count %}
+                                {% if category_count.pk == news.category %}
                               <li>
                                   <a href="{{category_count.get_absolute_url}}" class="d-flex justify-content-between">
                                       <p>{{category_count.title}}</p>
 									  		{{category_count.count}}
                                   </a>
                               </li>
-                                {%endif%}
-                                {%endfor%}
-                                {%endif%}
-                                {%endfor%}
+                                {% endif %}
+                                {% endfor %}
+                                {% endif %}
+                                {% endfor %}
 
                           </ul>
                           <div class="br"></div>
