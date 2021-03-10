@@ -1,0 +1,26 @@
+<section class="blog_categorie_area">
+    <div class="container">
+        <div class="row">
+            {% for publisher in publishers %}
+            <div class="col-sm-6 col-lg-4 mb-4 mb-lg-0">
+                <br>
+                <div class="categories_post">
+                    {% if publisher.photo1 %}
+                    <img class="card-img rounded-0" src="{{publisher.photo1.url}}" alt="post" height="232" width="350">
+                    {% else %}
+                    <img class="card-img rounded-0" src="media/additional/no_photo_author.png" alt="post" height="214" width="350">
+                    {%endif%}
+                    <div class="categories_details">
+                        <div class="categories_text">
+                            <a href="{{publisher.get_absolute_url}}">
+                                <h5>{{publisher.publisher_name}}</h5>
+                            </a>
+                            <div class="border_line"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {%endfor%}
+        </div>
+    </div>
+</section>

@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block title %} {{author_info.name}} :: {{block.super}}
+{% endblock %}
+
+{% block content %}
+
+{% include 'inc/blog/author/_author_area.html' %}
+
+
+{% endblock %}

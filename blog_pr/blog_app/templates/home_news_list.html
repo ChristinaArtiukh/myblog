@@ -2,13 +2,11 @@
 
 {% block content %}
 
+{% include 'inc/home/_carousel.html' %}
+{% include 'inc/home/_trending_product_section.html' %}
+{% include 'inc/_more.html' %}
+{% include 'inc/home/_offer_section.html' %}
 {% include 'inc/home/_home_blog_section.html' %}
 
-<br>
-<section class="blog-area section">
-    <div class="container">
-        <a class="button button-hero" href="{% url 'news_list' %}" align="center"><b>Далее</b></a>
-   </div>
-</section>
 
 {% endblock %}

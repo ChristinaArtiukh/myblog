@@ -1,10 +1,32 @@
 from django import forms
-from django.http import request
-from .models import News, CommentsAuthor, CommentsNews, User, AuthorInfo, Category
+from .models import News, CommentsAuthor, CommentsNews, User, AuthorInfo, CommentsBook, \
+    CommentsWriter
 from django.utils.translation import gettext_lazy as gl
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 
 
+# ------------SHOP--------------
+class CommentsBookForm(forms.ModelForm):
+    class Meta:
+        model = CommentsBook
+        fields = ('quality', 'comment',)
+        exclude = ['author_name', 'book']
+        widgets = {
+            'comment': forms.Textarea(attrs={'cols': 50, 'rows': 10, 'class': "form-control"}),
+        }
+
+
+class CommentsWriterForm(forms.ModelForm):
+    class Meta:
+        model = CommentsWriter
+        fields = ('comment', )
+        exclude = ['author_name', 'writer']
+        widgets = {
+            'comment': forms.Textarea(attrs={'cols': 50, 'rows': 10, 'class': "form-control"}),
+        }
+
+
+# ------------BLOG--------------
 class AddCommentsAuthorForm(forms.ModelForm):
     class Meta:
         model = CommentsAuthor
@@ -19,16 +41,14 @@ class AddCommentsNewsForm(forms.ModelForm):
     class Meta:
         model = CommentsNews
         fields = ('comment', )
-        exclude = ['author_name', 'news', 'name']
+        exclude = ['author_name', 'news']
         widgets = {
             'comment': forms.Textarea(attrs={'cols': 100, 'rows': 20, 'class': "form-control"}),
         }
 
 
+# ------------USER--------------
 class UserAddInfoForm(forms.ModelForm):
-    # preferences = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, choices=Category)
-
-
     class Meta:
         model = User
         fields = ('b_day', 'photo', 'preferences')
@@ -59,8 +79,6 @@ class UpdateUserForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ('first_name', 'last_name', 'b_day', 'photo', 'preferences')
-
-    # preferences_formset  ry(model=Category)
 
 
 class UpdateAuthorForm(forms.ModelForm):
@@ -136,35 +154,3 @@ class ChangeStatusNewsForm(forms.ModelForm):
         widgets = {
             'content': forms.Textarea(attrs={'cols': 80, 'rows': 10 }),
         }
-
-# class AddNewsForm(forms.ModelForm):
-#     class Meta:
-#         model = News
-#         fields = '__all__'
-#             # ['title', 'author',  'category', 'status', 'content']
-#         # field_classes = {
-#         #     'slug': MySlugFormField,
-#         # }
-#         # widgets = {
-#         #     'content': forms.Textarea(attrs={'cols': 80, 'rows': 20,}),
-#         # }
-#
-#         labels = {
-#             'title': gl('Название'),
-#             'author': gl('Автор'),
-#             'category': gl('Категория'),
-#             'status': gl('Статус'),
-#             'content': gl('Статья'),
-#         }
-#         help_texts = {
-#             'title': gl('Введите название статьи'),
-#             'author': gl('Выбирите имя автора'),
-#             'category': gl('Выбирите категорию'),
-#             'status': gl('Укажите статус'),
-#             'content': gl('Добавьте статью'),
-#         }
-#         error_messages = {
-#             'title': {
-#                 'max_length': gl("Название статьи превышает лимит"),
-#             },
-#         }

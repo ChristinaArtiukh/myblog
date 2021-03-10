@@ -1,0 +1,31 @@
+<section class="section-margin calc-60px">
+  <div class="container">
+    <div class="section-intro pb-60px">
+          <p>Популярные книги</p>
+          <h2>Хит <span class="section-intro__style">продаж</span></h2>
+        </div>
+    <div class="row">
+      {% for book in books%}
+      <div class="col-md-6 col-lg-4 col-xl-3" >
+        <div class="card text-center card-product">
+              <div class="card-product__img">
+                {%if book.photo1 %}
+                <img class="card-img" src="{{book.photo1.url}}" height="250">
+                {%endif%}
+                <ul class="card-product__imgOverlay">
+                  <li><button><i class="ti-search"></i></button></li>
+                  <li><button><i class="ti-shopping-cart"></i></button></li>
+                  <li><button><i class="ti-heart"></i></button></li>
+                </ul>
+              </div>
+              <div class="card-body">
+                <p>{{book.writer}}</p>
+                <h4 class="card-product__title"><a href="{{book.get_absolute_url}}">{{book.title|truncatewords:5 }}</a></h4>
+                <p class="card-product__price">{{book.price}} грн.</p>
+              </div>
+            </div>
+      </div>
+      {%endfor%}
+    </div>
+  </div>
+</section>

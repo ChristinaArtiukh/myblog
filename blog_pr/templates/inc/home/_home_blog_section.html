@@ -6,7 +6,7 @@
           <h2> <span class="section-intro__style">Новости</span></h2>
         </div>
         <div class="row">
-           {% for news in news %}
+           {% for news in news|slice:"3" %}
           <div class="col-md-6 col-lg-4 mb-4 mb-lg-0">
             <div class="card card-blog">
               <div class="card-blog__img">
@@ -24,11 +24,14 @@
                     {% if info.id == author.maker_id %}
                   <li><a href="{{ author.get_absolute_url }}">{{info.first_name}} {{info.last_name}} </a></li>
                     {%endif%}
+                    {% endif %}
+                    {% endfor %}
+                    {% endfor %}
                   <li><a href="{{news.get_absolute_url}}">
                        {% for comments in comments_count %}
                             {% if comments.pk == news.id %}
                                 {% if  comments.count == 1 %}
-                                    <i class="ti-comments-smiley"></i> {{comments.count}}
+                                    <i class="ti-comments-smiley"></i> {{comments.count}} комментарий
                                 {% elif comments.count > 1 and comments.count < 5  %}
                                     <i class="ti-comments-smiley"></i>{{comments.count}} комментария
                                 {%else%}
@@ -37,13 +40,9 @@
                             {%endif%}
                       {%endfor%}
                      </a></li>
-                  {% endif %}
-
-                  {% endfor %}
-                    {% endfor %}
                 </ul>
-                <h4 class="card-blog__title"><a href="{{news.get_absolute_url}}">{{news.title}}</a></h4>
-                <p>{{news.content|slice:":100"}}</p>
+                <h4 class="card-blog__title"><a href="{{news.get_absolute_url}}">{{news.title|truncatewords:7 }}</a></h4>
+                <p>{{news.content|truncatechars:100}}</p>
                 <a class="card-blog__link" href="{{news.get_absolute_url}}">Читать <i class="ti-arrow-right"></i></a>
               </div>
             </div>

@@ -1,55 +1,150 @@
-from django.db.models import Count
+from django.db.models import Count, Max, Min, Avg
 from django.db.models import Q
-from django.http import HttpResponseRedirect, HttpResponseForbidden
+from django.http import HttpResponseRedirect
 from django.contrib import messages
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, DetailView, UpdateView
-from django.views.generic.base import View
-from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.edit import FormMixin
 from .forms import AddCommentsAuthorForm, AddCommentsNewsForm, LoginUserForm, RegisteredUserForm, CreateAuthorForm, \
-    UserAddInfoForm, UpdateUserForm, UpdateAuthorForm, AddNewsForm, UpdateNewsForm, ChangeStatusNewsForm
-from .models import News, Category, CommentsNews, User, AuthorInfo, CommentsAuthor
+    UserAddInfoForm, UpdateUserForm, UpdateAuthorForm, AddNewsForm, UpdateNewsForm, ChangeStatusNewsForm, \
+    CommentsBookForm, CommentsWriterForm
+from .models import News, Category, CommentsNews, User, AuthorInfo, CommentsAuthor, Book, Writer, Publisher,\
+    Genre, CommentsBook, CommentsWriter
 from django.contrib.auth import login, logout
 
 
-class HomeNewsViews(ListView):
-    model = News
+#Home
+class HomeViews(ListView):
+    model = Book
     template_name = 'home_news_list.html'
-    context_object_name = 'news'
-    queryset = News.published.all()
-    paginate_by = 9
+    context_object_name = 'books'
+    queryset = Book.published.all()
+    paginate_by = 8
 
     def get_context_data(self, **kwargs):
-        context = super(HomeNewsViews, self).get_context_data(**kwargs)
+        context = super(HomeViews, self).get_context_data(**kwargs)
+        context['title'] = 'Главная'
         context['author_list'] = AuthorInfo.objects.all()
         context['author_info'] = User.objects.filter(author_status='author')
         context['comments_count'] = News.published.values('pk').annotate(count=Count('comments')).filter(count__gt=0)
+        context['news'] = News.published.all()
         return context
 
 
+# ------------SHOP--------------
+class CatalogBookListView(ListView):
+    model = Book
+    template_name = 'shop/book/catalog.html'
+    context_object_name = 'catalog'
+    queryset = Book.published.all()
+    ordering = ('-update_date',)
+    paginate_by = 6
+
+    def get_context_data(self, **kwargs):
+        context = super(CatalogBookListView, self).get_context_data()
+        context['title'] = 'Каталог'
+        context['writer'] = Writer.objects.all()
+        context['publisher'] = Publisher.objects.all()
+        context['genre'] = Genre.objects.all()
+        context['genre_count'] = Genre.objects.annotate(count=Count('book')).filter(count__gt=0)
+        context['high_price'] = Book.published.all().values('price',).aggregate(max=Max('price'))
+        context['low_price'] = Book.published.all().values('price',).aggregate(min=Min('price'))
+        return context
+
+    def get_ordering(self):
+        ordering = self.request.GET.get('orderby')
+        return ordering
+
+    def get_paginate_by(self, queryset):
+        return self.paginate_by
+
+
+class BookDetailView(FormMixin, DetailView):
+    model = Book
+    template_name = 'shop/book/book.html'
+    context_object_name = 'book'
+    form_class = CommentsBookForm
+
+    def get_context_data(self, **kwargs):
+        context = super(BookDetailView, self).get_context_data()
+        context['writer'] = Writer.objects.filter(pk=self.object.writer_id)
+        context['publisher'] = Publisher.objects.filter(pk=self.object.publisher_name_id)
+        context['genre_all'] = Genre.objects.all()
+        context['user'] = User.objects.all()
+        context['comments'] = CommentsBook.objects.all()
+        context['avg'] = CommentsBook.objects.all().values('quality',).aggregate(avg=Avg('quality'))
+        context['quality_count'] = Book.objects.values('pk',).annotate(count=Count('commentsbook')).filter(count__gt=0)
+        return context
+
+    def post(self, request, *args, **kwargs):
+        if request.method == 'POST':
+            form = CommentsBookForm(request.POST)
+            if form.is_valid():
+                this_book = Book.objects.get(slug=self.kwargs['slug'])
+                form = form.save(commit=False)
+                form.author_name = request.user
+                form.book = this_book
+                form.save()
+                return HttpResponseRedirect(self.request.path_info)
+            else:
+                form = CommentsBookForm()
+        return render(request, 'shop/book/book.html', {'form': form})
+
+
+class WritersListView(ListView):
+    model = Writer
+    context_object_name = 'writers'
+    template_name = 'shop/writer/writers.html'
+    queryset = Writer.objects.all()
+    paginate_by = 20
+
+
+class WriterDetailView(FormMixin, DetailView):
+    model = Writer
+    context_object_name = 'writer'
+    template_name = 'shop/writer/writer.html'
+    form_class = CommentsWriterForm
+
+
+class PublishersListView(ListView):
+    model = Publisher
+    context_object_name = 'publishers'
+    template_name = 'shop/publisher/publishers.html'
+    queryset = Publisher.objects.all()
+    paginate_by = 20
+
+
+class PublisherDetailView(DetailView):
+    model = Publisher
+    context_object_name = 'publisher'
+    template_name = 'shop/publisher/publisher.html'
+
+
+# ------------BLOG--------------
+# News list
 class NewsListViews(ListView):
     model = News
-    template_name = 'news.html'
+    template_name = 'blog/news/news.html'
     context_object_name = 'news'
     queryset = News.published.all()
     paginate_by = 9
 
     def get_context_data(self, **kwargs):
         context = super(NewsListViews, self).get_context_data(**kwargs)
+        context['title'] = 'Список новостей'
         context['author_list'] = AuthorInfo.objects.all()
         context['author_info'] = User.objects.filter(author_status='author')
         context['category'] = Category.objects.all()
         context['comments_count'] = News.published.values('pk').annotate(count=Count('comments')).filter(count__gt=0)
         context['category_count'] = Category.objects.annotate(count=Count('news')).filter(count__gt=0)
-
         return context
 
 
+# News detail
 class NewsDetailViews(FormMixin, DetailView):
     model = News
-    template_name = 'news_detail.html'
+    template_name = 'blog/news/news_detail.html'
     context_object_name = 'news_detail'
     form_class = AddCommentsNewsForm
 
@@ -88,22 +183,25 @@ class NewsDetailViews(FormMixin, DetailView):
         return render(request, 'news_detail.html', {'form': form})
 
 
-class AuthorListViews(ListView):
+# Authors list
+class AuthorsListViews(ListView):
     model = User
-    template_name = 'authors.html'
+    template_name = 'blog/author/authors.html'
     context_object_name = 'author_info'
     queryset = User.objects.filter(author_status='author')
     paginate_by = 9
 
     def get_context_data(self, **kwargs):
-        context = super(AuthorListViews, self).get_context_data(**kwargs)
+        context = super(AuthorsListViews, self).get_context_data(**kwargs)
+        context['title'] = 'Список авторов'
         context['slug'] = AuthorInfo.objects.all()
         return context
 
 
+# Author detail
 class AuthorDetailViews(FormMixin, DetailView):
     model = AuthorInfo
-    template_name = 'author_detail.html'
+    template_name = 'blog/author/author_detail.html'
     context_object_name = 'author_info'
     form_class = AddCommentsAuthorForm
 
@@ -136,9 +234,74 @@ class AuthorDetailViews(FormMixin, DetailView):
         return render(request, 'author_detail.html', {'form': form})
 
 
+# Category list
+class CategoriesListViews(ListView):
+    model = Category
+    template_name = 'blog/category/categories.html'
+    context_object_name = 'categories'
+    queryset = Category.objects.all()
+    paginate_by = 9
+
+    def get_context_data(self, **kwargs):
+        context = super(CategoriesListViews, self).get_context_data(**kwargs)
+        context['title'] = 'Список категорий'
+        return context
+
+
+# Category detail
+class CategoryDetailViews(DetailView):
+    model = Category
+    template_name = 'blog/category/category.html'
+    context_object_name = 'category'
+
+    def get_context_data(self, **kwargs):
+        context = super(CategoryDetailViews, self).get_context_data(**kwargs)
+        context['news'] = News.published.filter(category=self.object.pk)
+        context['user_list'] = User.objects.filter(author_status='author')
+        context['author_list'] = AuthorInfo.objects.all()
+        context['comments_count'] = News.published.values('pk').annotate(count=Count('comments')).filter(count__gt=0)
+        return context
+
+
+# --------------USER-------------
+# Registration
+def registration(request):
+    if request.method == 'POST':
+        form = RegisteredUserForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('create_info')
+        else:
+            messages.error(request, 'Ошибка регистрации')
+    else:
+        form = RegisteredUserForm()
+    return render(request, 'user/registration.html', {'form': form})
+
+
+# Login
+def user_login(request):
+    if request.method == 'POST':
+        form = LoginUserForm(data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect('home')
+    else:
+        form = LoginUserForm()
+    return render(request, 'user/login.html', {'form': form})
+
+
+# Logout
+def user_logout(request):
+    logout(request)
+    return redirect('login')
+
+
+# Profile
 class ProfilePageView(ListView):
     model = AuthorInfo
-    template_name = 'profile_page.html'
+    template_name = 'user/profile_page.html'
     context_object_name = 'profile'
 
     def get_context_data(self, **kwargs):
@@ -148,6 +311,7 @@ class ProfilePageView(ListView):
         return context
 
 
+# add info for new user
 def add_profile_info(request):
     if request.user.i_am_author == True:
         user_info = request.user
@@ -166,7 +330,7 @@ def add_profile_info(request):
         else:
             form = CreateAuthorForm()
             form_one = UserAddInfoForm()
-        return render(request, 'create_info_page.html', {'form': form, 'form_one': form_one})
+        return render(request, 'user/create_info_page.html', {'form': form, 'form_one': form_one})
     else:
         user_info = request.user
         if request.method == 'POST':
@@ -178,26 +342,13 @@ def add_profile_info(request):
             return redirect('profile')
         else:
             form_one = UserAddInfoForm()
-        return render(request, 'create_info_page.html', {'form_one': form_one})
+        return render(request, 'user/create_info_page.html', {'form_one': form_one})
 
 
-class ChangeStatusNewsView(UpdateView):
-    model = News
-    template_name = 'change_status_news.html'
-    form_class = ChangeStatusNewsForm
-    queryset = News.published.all()
-    success_url = reverse_lazy('profile')
-
-    def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        self.object.status = 'draft'
-        self.object.save(update_fields=('status',))
-        return redirect('profile')
-
-
+# Update user info
 class UserUpdateView(UpdateView):
     model = User
-    template_name = 'update_info_page.html'
+    template_name = 'user/update_info_page.html'
     form_class = UpdateUserForm
     success_url = reverse_lazy('profile')
 
@@ -205,9 +356,10 @@ class UserUpdateView(UpdateView):
         return self.request.user
 
 
+# Update author info
 class AuthorUpdateView(UpdateView):
     model = AuthorInfo
-    template_name = 'author_update_page.html'
+    template_name = 'user/author/author_update_page.html'
     form_class = UpdateAuthorForm
     success_url = reverse_lazy('update_info')
 
@@ -216,9 +368,10 @@ class AuthorUpdateView(UpdateView):
         return super().post(request, *args, **kwargs)
 
 
+# Add news only for user with author status
 class AddNewsView(FormMixin, DetailView):
     model = AuthorInfo
-    template_name = 'add_news.html'
+    template_name = 'user/author/add_news.html'
     context_object_name = 'add_news'
     form_class = AddNewsForm
 
@@ -235,12 +388,13 @@ class AddNewsView(FormMixin, DetailView):
                 return redirect('profile')
         else:
             form = AddNewsForm()
-        return render(request, 'add_news.html', {'form': form})
+        return render(request, 'user/author/add_news.html', {'form': form})
 
 
+# Update news only for user with author status
 class NewsUpdateView(UpdateView):
     model = News
-    template_name = 'news_update_page.html'
+    template_name = 'user/author/news_update_page.html'
     form_class = UpdateNewsForm
     success_url = reverse_lazy('profile')
 
@@ -254,57 +408,28 @@ class NewsUpdateView(UpdateView):
         return super().post(request, *args, **kwargs)
 
 
-class CategoryListViews(ListView):
-    model = Category
-    template_name = 'categories.html'
-    context_object_name = 'categories'
-    queryset = Category.objects.all()
-    paginate_by = 9
+# Change news status
+class ChangeStatusNewsView(UpdateView):
+    model = News
+    template_name = 'user/author/change_status_news.html'
+    form_class = ChangeStatusNewsForm
+    queryset = News.published.all()
+    success_url = reverse_lazy('profile')
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        self.object.status = 'draft'
+        self.object.save(update_fields=('status',))
+        return redirect('profile')
 
 
-class CategoryDetailViews(DetailView):
-    model = Category
-    template_name = 'category.html'
-    context_object_name = 'category'
-
-    def get_context_data(self, **kwargs):
-        context = super(CategoryDetailViews, self).get_context_data(**kwargs)
-        context['news'] = News.published.filter(category=self.object.pk)
-        context['user_list'] = User.objects.filter(author_status='author')
-        context['author_list'] = AuthorInfo.objects.all()
-        context['comments_count'] = News.published.values('pk').annotate(count=Count('comments')).filter(count__gt=0)
-        return context
 
 
-def registration(request):
-    if request.method == 'POST':
-        form = RegisteredUserForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect('create_info')
-        else:
-            messages.error(request, 'Ошибка регистрации')
-    else:
-        form = RegisteredUserForm()
-    return render(request, 'registration.html', {'form': form})
 
 
-def user_logout(request):
-    logout(request)
-    return redirect('login')
 
 
-def user_login(request):
-    if request.method == 'POST':
-        form = LoginUserForm(data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-            return redirect('home')
-    else:
-        form = LoginUserForm()
-    return render(request, 'login.html', {'form': form})
+
 
 
 
