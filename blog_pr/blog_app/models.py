@@ -41,10 +41,6 @@ class User(AbstractUser):
 # class UserBookListPreference(models.Model):
 #     user = models.OneToOneField('User', verbose_name='Книги', blank=True)
 #     book = models.ManyToManyField('Book', verbose_name='Книги', blank=True)
-
-
-
-
 # ------------SHOP--------------
 class Book(models.Model):
     STATUS_CHOICE = (
@@ -60,13 +56,13 @@ class Book(models.Model):
     publish_year = models.DateField(verbose_name='Год публикации', blank=True)
     creation_date = models.DateTimeField(auto_now_add=True, blank=True, verbose_name='Дата создания')
     update_date = models.DateTimeField(auto_now=True, blank=True, verbose_name='Дата обновления')
-    photo1 = models.FileField(blank=True, upload_to='media/%Y/%m/%d', verbose_name='Фото1')
-    photo2 = models.FileField(blank=True, null=True, upload_to='media/%Y/%m/%d', verbose_name='Фото2')
+    photo1 = models.ImageField(blank=True, upload_to='media/%Y/%m/%d', verbose_name='Фото1')
+    photo2 = models.ImageField(blank=True, null=True, upload_to='media/%Y/%m/%d', verbose_name='Фото2')
     price = models.PositiveSmallIntegerField(blank=True, verbose_name='Цена', default='1')
     discount = models.PositiveSmallIntegerField(blank=True, verbose_name='Скидка', default='1')
     writer = models.ForeignKey('Writer', blank=True, on_delete=models.CASCADE, verbose_name='Автор')
-    publisher_name = models.ForeignKey('Publisher', blank=True, on_delete=models.CASCADE, verbose_name='Издательство')
-    genre_name = models.ManyToManyField('Genre', blank=True, verbose_name='Жанр')
+    publisher = models.ForeignKey('Publisher', blank=True, on_delete=models.CASCADE, verbose_name='Издательство')
+    genre = models.ManyToManyField('Genre', blank=True, verbose_name='Жанр')
     objects = models.Manager()
     published = PublishedBookManager()
 
@@ -143,7 +139,7 @@ class CommentsBook(models.Model):
     comment = models.TextField(verbose_name='Комментарий')
     date = models.DateTimeField(auto_now_add=True, verbose_name='Дата')
     book = models.ForeignKey('Book', on_delete=models.CASCADE, verbose_name='Книга')
-    quality = models.CharField(max_length=100, choices=QUALITY, default='5', verbose_name='Оценка')
+    quality = models.CharField(max_length=100, choices=QUALITY, default='5', verbose_name='Оценка', blank=True)
 
     class Meta:
         ordering = ['author_name']
@@ -151,7 +147,7 @@ class CommentsBook(models.Model):
         verbose_name_plural = 'SHOP-Комментарии к книге'
 
     def __str__(self):
-        return self.comment, self.quality
+        return self.comment
 
 
 class CommentsWriter(models.Model):

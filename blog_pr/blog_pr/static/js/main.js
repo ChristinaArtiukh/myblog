@@ -1,119 +1,79 @@
-$(function() {
-  "use strict";
+console.log('Hello')
+const spinner = document.getElementById('spinner')
+const divBody = document.getElementById('div-body-box')
 
-  //------- Parallax -------//
-  skrollr.init({
-    forceHeight: false
-  });
+//модальное окно
+$.ajax({
+    type:'GET',
+    url: '/add-comment/',
+    success: function(response){
+        console.log(response)
+        const data = JSON.parse(response.data)
+        console.log(data)
+        data.forEach(el=>{
+            console.log(el.fields)
+            divBody.innerHTML = "<div class=\"col-lg-6\"><button type=\"button\" class=\"button primary-btn\" data-bs-toggle=\"modal\" data-bs-target=\"#commentModal\">\n" +
+                "  Комментарий\n" +
+                "</button></div>"
 
-  //------- Active Nice Select --------//
-  $('select').niceSelect();
+        })
+        spinner.classList.add('not-visible')
+    },
+    error:function(error){
+        console.log(error)
 
-  //------- hero carousel -------//
-  $(".hero-carousel").owlCarousel({
-    items:3,
-    margin: 10,
-    autoplay:false,
-    autoplayTimeout: 5000,
-    loop:true,
-    nav:false,
-    dots:false,
-    responsive:{
-      0:{
-        items:1
-      },
-      600:{
-        items: 2
-      },
-      810:{
-        items:3
-      }
     }
-  });
+})
 
-  //------- Best Seller Carousel -------//
-  if($('.owl-carousel').length > 0){
-    $('#bestSellerCarousel').owlCarousel({
-      loop:true,
-      margin:30,
-      nav:true,
-      navText: ["<i class='ti-arrow-left'></i>","<i class='ti-arrow-right'></i>"],
-      dots: false,
-      responsive:{
-        0:{
-          items:1
-        },
-        600:{
-          items: 2
-        },
-        900:{
-          items:3
-        },
-        1130:{
-          items:4
-        }
-      }
-    })
-  }
 
-  //------- single product area carousel -------//
-  $(".s_Product_carousel").owlCarousel({
-    items:1,
-    autoplay:false,
-    autoplayTimeout: 5000,
-    loop:true,
-    nav:false,
-    dots:false
-  });
+// простенький класс, для упрощения сохранения
+// и чтения массивов объектов в localStorage
+/* Обработчик клика на чекбоксах */
 
-  //------- mailchimp --------//  
-	function mailChimp() {
-		$('#mc_embed_signup').find('form').ajaxChimp();
-	}
-  mailChimp();
-  
-  //------- fixed navbar --------//  
-  $(window).scroll(function(){
-    var sticky = $('.header_area'),
-    scroll = $(window).scrollTop();
-
-    if (scroll >= 100) sticky.addClass('fixed');
-    else sticky.removeClass('fixed');
-  });
-
-  //------- Price Range slider -------//
-  if(document.getElementById("price-range")){
-  
-    var nonLinearSlider = document.getElementById('price-range');
-    
-    noUiSlider.create(nonLinearSlider, {
-        connect: true,
-        behaviour: 'tap',
-        start: [ 500, 4000 ],
-        range: {
-            // Starting at 500, step the value by 500,
-            // until 4000 is reached. From there, step by 1000.
-            'min': [ 0 ],
-            '10%': [ 500, 500 ],
-            '50%': [ 4000, 1000 ],
-            'max': [ 10000 ]
-        }
-    });
-  
-  
-    var nodes = [
-        document.getElementById('lower-value'), // 0
-        document.getElementById('upper-value')  // 1
-    ];
-  
-    // Display the slider value and how far the handle moved
-    // from the left edge of the slider.
-    nonLinearSlider.noUiSlider.on('update', function ( values, handle, unencoded, isTap, positions ) {
-        nodes[handle].innerHTML = values[handle];
-    });
-  
-  }
-  
+$('input').on('input', function() {
+  let aChecked = [];
+  $('input[type="checkbox"]:checked').each(function() { aChecked.push($(this).getPath()); });
+  localStorage.setItem('CheckboxChecked', aChecked.join(';'));
+  localStorage.setItem('PasswordLength', $('#height_opt').val());
 });
 
+/* Установка состояний чекбоксов, после загрузки страницы */
+$(document).ready(function() {
+  if (localStorage.getItem('CheckboxChecked')) {
+    let aChecked = localStorage.getItem('CheckboxChecked').split(';');
+    $('input[type="checkbox"]').prop('checked', false);
+    aChecked.forEach(function(str) { $(str).prop('checked', true); });
+  }
+  if (localStorage.getItem('PasswordLength')) {
+    $('#height_opt').val(localStorage.getItem('PasswordLength'));
+  }
+});
 
+/************************************************************
+ * Функция для jQ, возвращающая уникальный селектор элемента *
+ * Источник: https://stackoverflow.com/a/26762730/10179415   *
+ ************************************************************/
+jQuery.fn.extend({
+  getPath: function() {
+    let pathes = [];
+    this.each(function(index, element) {
+      let path, $node = jQuery(element);
+      while ($node.length) {
+        let realNode = $node.get(0), name = realNode.localName;
+        if (!name) { break; }
+        name = name.toLowerCase();
+        let parent = $node.parent();
+        let sameTagSiblings = parent.children(name);
+        if (sameTagSiblings.length > 1) {
+          let allSiblings = parent.children();
+          let index = allSiblings.index(realNode) + 1;
+          if (index > 0) { name += ':nth-child(' + index + ')'; }
+        }
+        path = name + (path ? '>' + path : '');
+        $node = parent;
+      }
+      pathes.push(path);
+    });
+    return pathes.join(',');
+  }
+});

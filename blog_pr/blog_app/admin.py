@@ -23,12 +23,12 @@ class WriterAdmin(admin.ModelAdmin):
 
 @admin.register(Book)
 class BookAdmin(admin.ModelAdmin):
-    list_display = ('title', 'publisher_name', 'status', 'maker', 'creation_date', 'update_date')
+    list_display = ('title', 'publisher', 'status', 'maker', 'creation_date', 'update_date')
     prepopulated_fields = {'slug': ('title',)}
     list_filter = ('creation_date', 'update_date')
-    search_fields = ('title', 'content')
+    search_fields = ('title__title__name', 'writer__field1',  'content')
     ordering = ('-creation_date',)
-    raw_id_fields = ('genre_name', 'publisher_name', 'writer')
+    raw_id_fields = ('genre', 'publisher', 'writer')
     save_on_top = True
 
 
@@ -48,14 +48,16 @@ class CommentsWriterAdmin(admin.ModelAdmin):
     ordering = ('-date',)
 
 
-@admin.register(CommentsBook)
-class CommentsBookAdmin(admin.ModelAdmin):
-    list_display = ('author_name', )
-    search_fields = ('book', 'comment')
-    ordering = ('-date',)
+# @admin.register(CommentsBook)
+# class CommentsBookAdmin(admin.ModelAdmin):
+#     list_display = ('author_name', )
+#     search_fields = ('book', 'comment')
+#     ordering = ('-date',)
 
 
 admin.site.register(Genre)
+
+admin.site.register(CommentsBook)
 
 
 # ------------BLOG--------------

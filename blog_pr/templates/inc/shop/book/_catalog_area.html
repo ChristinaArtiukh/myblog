@@ -1,23 +1,4 @@
-<section class="blog-banner-area" id="category">
-    <div class="container h-100">
-        <div class="blog-banner">
-            <div class="text-center">
-                <h1>Shop Category</h1>
-                <nav aria-label="breadcrumb" class="banner-breadcrumb">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="#">Home</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">Shop Category</li>
-                    </ol>
-                </nav>
-            </div>
-        </div>
-    </div>
-</section>
-<!-- ================ end banner area ================= -->
-
-
-<!-- ================ category section start ================= -->
-<section class="section-margin--small mb-5">
+<section class="section-margin--small mb-5" xmlns="http://www.w3.org/1999/html">
     <div class="container">
         <div class="row">
             <div class="col-xl-3 col-lg-4 col-md-5">
@@ -25,46 +6,82 @@
                     <div class="top-filter-head">Фильтры</div>
                     <div class="common-filter">
                         <div class="head">Жанры</div>
-                        <form action="#">
-                            <ul>
-                                {% for genre in genre %}
+                        {% for genre in genre_filter %}
+                        <form action="{% url 'catalog' %}" method="get" id="{{genre.genre__genre_name}}">
+
+                            <ul class="checkbox-filter">
                                 <li class="filter-list">
-                                    <input class="pixel-radio" type="radio" id="{{genre.genre_name}}" name="brand">
-                                    <label for="{{genre.genre_name}}">{{genre.genre_name}}<span> {%for genre_count in genre_count%}
-                                                {% if genre_count.pk == genre.pk %}
-                                                ({{genre_count.count}})
-                                                {%endif%}
-                                                {%endfor%}</span></label>
+                                    <input class="check"
+                                           type="checkbox"
+                                           value="{{genre.genre__genre_name}}"
+                                           onclick="document.getElementById('{{genre.genre__genre_name}}').submit();"
+                                           name="genre">
+                                    <label for="{{genre.genre__genre_name}}">{{genre.genre__genre_name}}
+                                        {%for count in genre_count%}
+                                        {% if  count.genre_name == genre.genre__genre_name %}
+                                        <span class="sidebar-block__quantity">
+                                            ({{count.count}})
+                                        </span>
+                                        {%endif%}
+                                        {%endfor%}
+                                    </label>
                                 </li>
-                                {%endfor %}
                             </ul>
+
                         </form>
+                        {%endfor %}
                     </div>
+
+
                     <div class="common-filter">
                         <div class="head">Издательства</div>
-                        <form action="#">
-                            <ul>
-                                {% for publisher in publisher %}
+                        {% for pub_filter in publisher_filter %}
+                        <form action="{% url 'catalog' %}" method="get" id="{{pub_filter.publisher__publisher_name}}">
+                            <ul class="checkbox-filter">
                                 <li class="filter-list">
-                                    <input class="pixel-radio" type="radio" id="{{publisher.publisher_name}}" name="brand">
-                                    <label for="{{publisher.publisher_name}}">{{publisher.publisher_name}}<span></span></label>
+                                    <input class="checkbox-filter"
+                                           type="checkbox"
+                                           value="{{pub_filter.publisher__publisher_name}}"
+                                           onclick="document.getElementById('{{pub_filter.publisher__publisher_name}}').submit();"
+                                           name="publisher" >
+                                    <label for="{{pub_filter.publisher__publisher_name}}">{{pub_filter.publisher__publisher_name}}
+                                        {%for count in publisher_count%}
+                                        {% if  count.publisher_name == pub_filter.publisher__publisher_name %}
+                                        <span class="sidebar-block__quantity">
+                                            ({{count.count}})
+                                        </span>
+                                        {%endif%}
+                                        {%endfor%}
+                                    </label>
                                 </li>
-                                {%endfor %}
                             </ul>
                         </form>
+                        {%endfor %}
                     </div>
                     <div class="common-filter">
                         <div class="head">Авторы</div>
-                        <form action="#">
-                            <ul>
-                                {%for writer in writer%}
+                        {% for writer in writer_filter %}
+                        <form action="{% url 'catalog' %}" method="get" id="{{writer.writer__writer_name}}">
+                            <ul class="checkbox-filter">
                                 <li class="filter-list">
-                                    <input class="pixel-radio" type="radio" id="{{writer.writer_name}}" name="color">
-                                    <label for="{{writer.writer_name}}">{{writer.writer_name}}<span></span></label>
+                                    <input class="checkbox-filter"
+                                           type="checkbox"
+                                           value="{{writer.writer__writer_name}}"
+                                           onclick="document.getElementById('{{writer.writer__writer_name}}').submit();"
+                                           name="writer" >
+                                    <label for="{{writer.writer__writer_name}}">{{writer.writer__writer_name}}
+                                        {%for count in writer_count%}
+                                        {% if  count.writer_name == writer.writer__writer_name %}
+                                        <span class="sidebar-block__quantity">
+                                            ({{count.count}})
+                                        </span>
+                                        {%endif%}
+                                        {%endfor%}
+                                    </label>
                                 </li>
-                                {%endfor %}
                             </ul>
                         </form>
+                        {%endfor %}
                     </div>
                     <div class="common-filter">
                         <div class="head">Price</div>
@@ -80,11 +97,19 @@
                             </div>
                         </div>
                     </div>
+
                 </div>
             </div>
             <div class="col-xl-9 col-lg-8 col-md-7">
                 <!-- Start Filter Bar -->
                 <div class="filter-bar d-flex flex-wrap align-items-center">
+                    <div class="sorting">
+                        <select>
+                            <option value="1">Default sorting</option>
+                            <option value="1">Default sorting</option>
+                            <option value="1">Default sorting</option>
+                        </select>
+                    </div>
                     <div class="sorting">
                         <form action="{% url 'catalog' %}" method="get" id="sortProductById">
                             <input type="hidden" name="orderby" value="-id" />
@@ -96,11 +121,14 @@
                             <input type="hidden" name="orderby" value="-price"/>
                         </form>
 
-                            <button  class="nav-link dropdown-toggle" data-toggle="dropdown" type="submit" type="submit" data-toggle="dropdown" id="menu2">Сортировать</button>
+                            <button  class="nav-link dropdown-toggle" data-toggle="dropdown" type="submit" id="menu2">Сортировать</button>
                             <ul class="dropdown-menu">
-                                <li class="nav-item"><a class="nav-link" onclick="document.getElementById('sortProductById').submit();">  По умолчанию  </a></li>
-                                <li class="nav-item"><a class="nav-link" onclick="document.getElementById('sortProductByPrice').submit();">  Цена (по возврастанию)  </a></a></li>
-                                <li class="nav-item"><a class="nav-link" onclick="document.getElementById('sortProductByPriceB').submit();">  Цена (по убыванию)  </a></a></li>
+                                <li class="nav-item">
+                                    <a class="nav-link" onclick="document.getElementById('sortProductById').submit();">  По умолчанию  </a></li>
+                                <li class="nav-item">
+                                    <a class="nav-link" onclick="document.getElementById('sortProductByPrice').submit();">  Цена (по возврастанию)  </a></a></li>
+                                <li class="nav-item">
+                                    <a class="nav-link" onclick="document.getElementById('sortProductByPriceB').submit();">  Цена (по убыванию)  </a></a></li>
                             </ul>
 
                     </div>
@@ -113,16 +141,31 @@
                         </select>
                     </div>
                     <div>
-                        <div class="input-group filter-bar-search">
-                            <input type="text" placeholder="Search">
-                            <div class="input-group-append">
-                                <button type="button"><i class="ti-search"></i></button>
-                            </div>
-                        </div>
+
+                        <form method="GET" form action="{% url 'catalog' %}" id="title_or_writer_query">
+                                <div class="input-group filter-bar-search">
+                                    <input class="form-control py-2 border-right-0 border" type="search" name="title_or_writer_query" placeholder="Поиск по названию...">
+                                    <div class="input-group-append">
+                                        <button type="button"><i class="ti-search" onclick="document.getElementById('title_or_writer_query').submit();"></i></button>
+                                    </div>
+                                </div>
+                        </form>
+
+
+<!--                        <div class="input-group filter-bar-search">-->
+<!--                            <input type="text" placeholder="Search">-->
+<!--                            <div class="input-group-append">-->
+<!--                                <button type="button"><i class="ti-search"></i></button>-->
+<!--                            </div>-->
+<!--                        </div>-->
                     </div>
                 </div>
                 <!-- End Filter Bar -->
                 <!-- Start Best Seller -->
+
+
+
+
                 <section class="lattest-product-area pb-40 category-list">
                     <div class="row">
                         {% for book in catalog %}
@@ -148,7 +191,7 @@
                         {%endfor%}
                     </div>
                 </section>
-                <!-- End Best Seller -->
+
             </div>
         </div>
     </div>

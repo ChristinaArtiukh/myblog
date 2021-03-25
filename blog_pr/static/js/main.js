@@ -1,5 +1,31 @@
+console.log('Hello')
+$.ajax({
+    type:'GET',
+    url:'add/comment',
+    success: function(response){
+        console.log(response)
+    },
+    error:function(error){
+        console.log(error)
+    }
+})
+
 $(function() {
-  "use strict";
+    "use strict";
+
+
+console.log('Hello')
+$.ajax({
+    type:'GET',
+    url:'add/comment',
+    success: function(response){
+        console.log(response)
+    },
+    error:function(error){
+        console.log(error)
+    }
+})
+
 
   //------- Parallax -------//
   skrollr.init({

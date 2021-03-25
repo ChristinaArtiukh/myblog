@@ -1,17 +1,47 @@
+from django.core import serializers
 from django.db.models import Count, Max, Min, Avg
 from django.db.models import Q
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, DetailView, UpdateView
+from django.views.generic.base import View, TemplateView
 from django.views.generic.edit import FormMixin
+from django_filters.views import FilterView
+from .filters import BookFilter
+from .serializers import BookSerializer
 from .forms import AddCommentsAuthorForm, AddCommentsNewsForm, LoginUserForm, RegisteredUserForm, CreateAuthorForm, \
     UserAddInfoForm, UpdateUserForm, UpdateAuthorForm, AddNewsForm, UpdateNewsForm, ChangeStatusNewsForm, \
     CommentsBookForm, CommentsWriterForm
 from .models import News, Category, CommentsNews, User, AuthorInfo, CommentsAuthor, Book, Writer, Publisher,\
     Genre, CommentsBook, CommentsWriter
 from django.contrib.auth import login, logout
+
+
+# Фильтры
+
+def is_valid_queryparam(param):
+    return param != '' and param is not None
+
+
+def blog_search(request):
+    news_qs = News.published.all()
+    search_qs = request.GET.get('search')
+    if is_valid_queryparam(search_qs):
+        news_qs = news_qs.filter(Q(title__icontains=search_qs) \
+                                 | Q(content__icontains=search_qs))
+    return news_qs
+
+
+def shop_search(request):
+    qs = Book.published.all()
+    title_or_writer_query = request.GET.get('title_or_writer_query')
+
+    if is_valid_queryparam(title_or_writer_query):
+        qs = qs.filter(Q(title__icontains=title_or_writer_query) | Q(writer__writer_name__icontains=title_or_writer_query))
+
+    return qs
 
 
 #Home
@@ -33,13 +63,12 @@ class HomeViews(ListView):
 
 
 # ------------SHOP--------------
-class CatalogBookListView(ListView):
+class CatalogBookListView(FilterView, ListView):
     model = Book
     template_name = 'shop/book/catalog.html'
     context_object_name = 'catalog'
-    queryset = Book.published.all()
-    ordering = ('-update_date',)
     paginate_by = 6
+    filterset_class = BookFilter
 
     def get_context_data(self, **kwargs):
         context = super(CatalogBookListView, self).get_context_data()
@@ -48,16 +77,22 @@ class CatalogBookListView(ListView):
         context['publisher'] = Publisher.objects.all()
         context['genre'] = Genre.objects.all()
         context['genre_count'] = Genre.objects.annotate(count=Count('book')).filter(count__gt=0)
+        context['writer_count'] = Writer.objects.annotate(count=Count('book')).filter(count__gt=0)
+        context['publisher_count'] = Publisher.objects.annotate(count=Count('book')).filter(count__gt=0)
         context['high_price'] = Book.published.all().values('price',).aggregate(max=Max('price'))
         context['low_price'] = Book.published.all().values('price',).aggregate(min=Min('price'))
+        context['publisher_filter'] = Book.published.all().values('publisher__publisher_name').order_by('publisher__publisher_name').distinct()
+        context['writer_filter'] = Book.published.all().values('writer__writer_name').order_by('writer__writer_name').distinct()
+        context['genre_filter'] = Book.published.all().values('genre__genre_name').order_by('genre__genre_name').distinct()
         return context
 
     def get_ordering(self):
         ordering = self.request.GET.get('orderby')
         return ordering
-
-    def get_paginate_by(self, queryset):
-        return self.paginate_by
+    
+    # def get_queryset(self):
+    #     qs = shop_search(self.request)
+    #     return qs
 
 
 class BookDetailView(FormMixin, DetailView):
@@ -69,27 +104,37 @@ class BookDetailView(FormMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super(BookDetailView, self).get_context_data()
         context['writer'] = Writer.objects.filter(pk=self.object.writer_id)
-        context['publisher'] = Publisher.objects.filter(pk=self.object.publisher_name_id)
+        context['publisher'] = Publisher.objects.filter(pk=self.object.publisher_id)
         context['genre_all'] = Genre.objects.all()
         context['user'] = User.objects.all()
-        context['comments'] = CommentsBook.objects.all()
-        context['avg'] = CommentsBook.objects.all().values('quality',).aggregate(avg=Avg('quality'))
-        context['quality_count'] = Book.objects.values('pk',).annotate(count=Count('commentsbook')).filter(count__gt=0)
+        context['comments'] = CommentsBook.objects.filter(book=self.object.pk)
+        context['avg'] = CommentsBook.objects.filter(book=self.object.pk).values('quality',).aggregate(avg=Avg('quality'))
+        context['quality_count'] = Book.objects.filter(pk=self.object.pk).values('pk',).annotate(count=Count('commentsbook')).filter(count__gt=0)
         return context
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, **kwargs):
         if request.method == 'POST':
             form = CommentsBookForm(request.POST)
             if form.is_valid():
                 this_book = Book.objects.get(slug=self.kwargs['slug'])
                 form = form.save(commit=False)
-                form.author_name = request.user
+                form.author_name = self.request.user
                 form.book = this_book
                 form.save()
                 return HttpResponseRedirect(self.request.path_info)
             else:
                 form = CommentsBookForm()
         return render(request, 'shop/book/book.html', {'form': form})
+
+
+class AddCommentBook(View):
+
+    def get(self, request):
+        qs = Book.objects.all()
+        data = serializers.serialize('json', qs)
+        return JsonResponse({'data': data}, safe=False)
+
+
 
 
 class WritersListView(ListView):
@@ -127,7 +172,6 @@ class NewsListViews(ListView):
     model = News
     template_name = 'blog/news/news.html'
     context_object_name = 'news'
-    queryset = News.published.all()
     paginate_by = 9
 
     def get_context_data(self, **kwargs):
@@ -139,6 +183,11 @@ class NewsListViews(ListView):
         context['comments_count'] = News.published.values('pk').annotate(count=Count('comments')).filter(count__gt=0)
         context['category_count'] = Category.objects.annotate(count=Count('news')).filter(count__gt=0)
         return context
+
+    def get_queryset(self):
+        # news_qs = News.published.all()
+        news_qs = blog_search(self.request)
+        return news_qs
 
 
 # News detail
@@ -215,7 +264,7 @@ class AuthorDetailViews(FormMixin, DetailView):
         context['comments'] = CommentsAuthor.objects.all().values('author_name', 'date', 'comment',
                                                                   ).filter(author_id=self.object.pk).order_by('-date')
         context['comments_count'] = CommentsAuthor.objects.filter(author_id=self.object.pk,
-                                                                  ).annotate(comments_count=Count('pk',\
+                                                                  ).annotate(comments_count=Count('pk',
                                                                 )).values_list('comments_count', flat=True)
         return context
 
