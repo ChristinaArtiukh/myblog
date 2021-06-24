@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="section-margin--small mb-5" xmlns="http://www.w3.org/1999/html">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-3 col-lg-4 col-md-5">
+                <div class="sidebar-filter">
+                    {% if request.path != request.get_full_path%}
+                   <a href="{% url 'catalog' %}">
+                       <button type="submit" class="button primary-btn" style="display: block; margin: 0 auto;" >
+                        Сбросить</button></a>
+                    <br><br>
+                    {%endif%}
+                    <div class="top-filter-head">Фильтры</div>
+                    <div class="common-filter">
+
+                        <form action="{% url 'catalog' %}" method="get">
+                            <div class="head">Жанры</div>
+                            {% for genre in genre_filter %}
+                                <ul class="checkbox-filter">
+                                    <li class="filter-list">
+                                    <input class="check"
+                                           type="checkbox"
+                                           value="{{genre.genre__genre_name}}"
+                                           onclick="document.getElementById('{{genre.genre__genre_name}}').submit();"
+                                           name="genre">
+                                    <label for="{{genre.genre__genre_name}}">{{genre.genre__genre_name}}
+                                        {%for count in genre_count%}
+                                        {% if  count.genre_name == genre.genre__genre_name %}
+                                        <span class="sidebar-block__quantity">
+                                            ({{count.count}})
+                                        </span>
+                                        {%endif%}
+                                        {%endfor%}
+                                    </label>
+                                </li>
+                                </ul>
+                            {%endfor %}
+                            <div class="head">Издательства</div>
+                                {% for pub_filter in publisher_filter %}
+                                <ul class="checkbox-filter">
+                                    <li class="filter-list">
+                                        <input class="checkbox-filter"
+                                               type="checkbox"
+                                               value="{{pub_filter.publisher__publisher_name}}"
+                                               onclick="document.getElementById('{{pub_filter.publisher__publisher_name}}').submit();"
+                                               name="publisher" >
+                                        <label for="{{pub_filter.publisher__publisher_name}}">{{pub_filter.publisher__publisher_name}}
+                                            {%for count in publisher_count%}
+                                            {% if  count.publisher_name == pub_filter.publisher__publisher_name %}
+                                            <span class="sidebar-block__quantity">
+                                                ({{count.count}})
+                                            </span>
+                                            {%endif%}
+                                            {%endfor%}
+                                        </label>
+                                    </li>
+                                </ul>
+                        {%endfor %}
+                            <div class="head">Авторы</div>
+                            {% for writer in writer_filter %}
+                            <ul class="checkbox-filter">
+                                <li class="filter-list">
+                                        <input class="checkbox-filter"
+                                               type="checkbox"
+                                               value="{{writer.writer__writer_name}}"
+                                               onclick="document.getElementById('{{writer.writer__writer_name}}').submit();"
+                                               name="writer" >
+                                        <label for="{{writer.writer__writer_name}}">{{writer.writer__writer_name}}
+                                            {%for count in writer_count%}
+                                            {% if  count.writer_name == writer.writer__writer_name %}
+                                            <span class="sidebar-block__quantity">
+                                                ({{count.count}})
+                                            </span>
+                                            {%endif%}
+                                            {%endfor%}
+                                        </label>
+                                    </li>
+                            </ul>
+                            {%endfor %}
+                            <br>
+                   <button type="submit" class="button primary-btn" style="display: block; margin: 0 auto;" >Найти</button>
+<!--                    <div class="common-filter">-->
+<!--                        <div class="head">Price</div>-->
+<!--                        <div class="price-range-area">-->
+<!--                            <div id="price-range"></div>-->
+<!--                            <div class="value-wrapper d-flex">-->
+<!--                                <div class="price">Цена:</div>-->
+<!--                                <span>$ {{low_price.min}}</span>-->
+<!--                                <div id="lower-value"></div>-->
+<!--                                <div class="to">to</div>-->
+<!--                                <span>$ {{ high_price.max }}</span>-->
+<!--                                <div id="upper-value"></div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-9 col-lg-8 col-md-7">
+                <!-- Start Filter Bar -->
+                <div class="filter-bar d-flex flex-wrap align-items-center">
+                    <div class="sorting">
+
+                    </div>
+                    <div class="sorting mr-auto">
+
+                    </div>
+                    <div>
+                        <div class="input-group filter-bar-search">
+                            <form method="GET" form action="{% url 'catalog' %}" id="title_or_writer_query">
+                                <div class="input-group filter-bar-search">
+                                    <input class="form-control py-2 border-right-0 border" type="search" name="title_or_writer_query" placeholder="Поиск по названию...">
+                                    <div class="input-group-append">
+                                        <button type="button"><i class="ti-search" onclick="document.getElementById('title_or_writer_query').submit();"></i></button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- End Filter Bar -->
+                <!-- Start Best Seller -->
+                <section class="lattest-product-area pb-40 category-list">
+                    <div class="row">
+                        {% for book in catalog %}
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card text-center card-product">
+                                <div class="card-product__img">
+                                    {%if book.photo1 %}
+                                    <img class="card-img" src="{{book.photo1.url}}" alt=""  height="250">
+                                    {%endif%}
+                                    <ul class="card-product__imgOverlay">
+                                        <li><button><i class="ti-search"></i></button></li>
+                                        <li><button><i class="ti-shopping-cart"></i></button></li>
+                                        <li><button><i class="ti-heart"></i></button></li>
+                                    </ul>
+                                </div>
+                                <div class="card-body">
+                                    <p>{{book.writer}}</p>
+                                    <h4 class="card-product__title"><a href="{{book.get_absolute_url}}">{{book.title|truncatewords:5}}</a></h4>
+                                    <p class="card-product__price">{{book.price}} грн.</p>
+                                </div>
+                            </div>
+                        </div>
+                        {%endfor%}
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+<!-- ================ category section end ================= -->
+

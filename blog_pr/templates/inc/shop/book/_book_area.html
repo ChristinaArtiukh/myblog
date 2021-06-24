@@ -43,16 +43,29 @@
 
                     </ul>
                     <div class="card_area d-flex align-items-center">
-                        <a class="button primary-btn" type="button" href="#">Купить</a>
+
+                        <form method="post">
+                            {% csrf_token %}
+                            {{ form.non_field.errors }}
+                            {% for form in cartform %}
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <br>
+                                    <p>{{form.label}}: </p>
+                                    <p>{{form}}</p>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            <div class="col-md-12 text-right">
+                                <a class="button primary-btn" type="button"  name="cartform">Купить</a>
+                            </div>
+                        </form>
+
+
                         <a class="icon_btn" href="#"><i class="lnr lnr lnr-heart"></i></a>
 
                     </div>
                     <br>
-                    <div class="card_area d-flex align-items-center">
-                        <a class="button primary-btn" type="button" href="#">Купить</a>
-                        <a class="icon_btn" href="#"><i class="lnr lnr lnr-heart"></i></a>
-
-                    </div>
                     </div>
                 </div>
             </div>
@@ -66,37 +79,17 @@
     <div class="container">
         <ul class="nav nav-tabs" id="myTab" role="tablist">
             <li class="nav-item">
-                <a class="nav-link" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Описание</a>
+                <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Описание</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link active" id="review-tab" data-toggle="tab" href="#review" role="tab" aria-controls="review"
-                   aria-selected="false">Отзывы</a>
+                <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact"
+					 aria-selected="false">Отзывы</a>
             </li>
         </ul>
         <div class="tab-content" id="myTabContent">
-            <div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="home-tab">
+            <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
                 <ul class="list">
-                    <div class="col-lg-6">
-                        <div class="row total_rate">
-                            <div class="col-6">
-                                <div class="box_total">
-                                    <h5>Средняя</h5>
-                                    <h4>{{avg.avg|floatformat}}</h4>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="rating_list">
-                                    {%for quality_count in quality_count%}
-                                    <h3>Основано на {{quality_count.count}} оценках</h3>
-                                    {%endfor%}
-                                    <ul class="list">
-                                        <li><a href="#">Отлично <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i
-                                                class="fa fa-star"></i><i class="fa fa-star"></i> 01</a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+
                     <br>
                     {%for publisher in publisher %}
                      <li>Издательство:  <a href="{{publisher.get_absolute_url}}">{{book.publisher}}</a></li>
@@ -104,88 +97,110 @@
                 </ul>
                 <p>{{book.content}}</p>
             </div>
-            <div class="tab-pane fade show active" id="review" role="tabpanel" aria-labelledby="review-tab">
-                <div class="row">
-                    <div class="col-lg-6">
-                    <!-- Modal -->
-                    <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="exampleModalLabel">Добавить комментарий</h5>
-                                </div>
-                                <div class="modal-body" id="modal-body">
-                                    <div class="review_box">
-                                        {%if request.user.is_authenticated%}
-                                        <form method="post">
-                                            {% csrf_token %}
-                                            {{ form.non_field.errors }}
-                                            {% for form in form %}
-                                            <div class="col-md-12">
-                                                <div class="form-group">
-                                                    <br>
-                                                    <p>{{form.label}}: </p>
-                                                    <p>{{form}}</p>
-                                                </div>
-                                            </div>
-                                            {% endfor %}
-                                            <div class="col-md-12 text-right">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-                                                <button type="submit" value="submit" class="btn btn-primary">Добавить</button>
-                                            </div>
-                                        </form>
-                                        {%else%}
-                                        <div class="comment-form">
-                                            <h4>Написать комментарий</h4>
-                                            <a href="{%url 'login'%}">Войдите</a> или <a href="{%url 'registration'%}">Зарегистрируйтесь</a> для написания комментария
-
-                                        </div>
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+            <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+					<div class="row">
+						<div class="col-lg-6">
+							<div class="comment_list">
+                                 {%if quality_count.count == 0 %}
+                                <h5>Комментариев нет</h5>
+                                {%else%}
+								<div class="review_item">
+                                    {%for user in user %}
+                                    {%for comment in comments %}
+                                    {% if user.id == comment.author_name_id %}
+									<div class="media">
+										<div class="d-flex">
+                                            {% if user.photo %}
+                                            <img src="{{user.photo.url}}" alt="" width="50" height="50">
+                                            {%else%}
+                                            <img src="{% static 'img/no_photo.png' %}" alt="" width="50" height="50">
+                                            {%endif%}
+										</div>
+										<div class="media-body">
+                                            {%if user.first_name%}
+                                            <h4>{{user.first_name}} {{user.last_name}}</h4>
+                                            {%else%}
+                                            <h4>{{user.username}}</h4>
+                                            {%endif%}
+                                            <h5>{{comment.date|date:'d.m.Y h:m'}}</h5>
+										</div>
+									</div>
+									 <p>{{comment.comment}}</p>
                                     {%endif%}
+                                    {%endfor%}
+                                    {%endfor%}
+								</div>
+                                {%endif%}
+							</div>
+						</div>
+                        <div class="col-lg-6">
+                            <div class="row total_rate">
+                                 <div class="col-6">
+                                     {%if quality_count.count == 0 %}
+
+                                     {%else %}
+                                    <div class="box_total">
+                                        <h5>Средняя</h5>
+                                        <h4>{{avg.avg|floatformat}}</h4>
+
+                                        {%for quality_count in quality_count%}
+                                        <p>Основано на {{quality_count.count}} оценках</p>
+                                        {%endfor%}
+                                    </div>
+                                     {%endif%}
+                                </div>
+                                 <div class="col-6">
+                                    <div class="rating_list">
+                                         <h4>Добавить комментарий</h4>
+                                        <br>
+                                         <!-- Modal -->
+                        <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLabel">Добавить комментарий</h5>
+                                    </div>
+                                    <div class="modal-body" id="modal-body">
+                                        <div class="review_box">
+                                            {%if request.user.is_authenticated%}
+                                            <form method="post">
+                                                {% csrf_token %}
+                                                {{ form.non_field.errors }}
+                                                {% for form in commentform %}
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <br>
+                                                        <p>{{form.label}}: </p>
+                                                        <p>{{form}}</p>
+                                                    </div>
+                                                </div>
+                                                {% endfor %}
+                                                <div class="col-md-12 text-right">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                                                    <button type="submit" value="submit" class="btn btn-primary" name="commentform">Добавить</button>
+                                                </div>
+                                            </form>
+                                            {%else%}
+                                            <div class="comment-form">
+                                                <h4>Написать комментарий</h4>
+                                                <a href="{%url 'login'%}">Войдите</a> или <a href="{%url 'registration'%}">Зарегистрируйтесь</a> для написания комментария
+
+                                            </div>
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                                        {%endif%}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-lg-6" id="div-body-box"></div>
-                        <br>
-                        <div class="review_list">
-                            {%for user in user %}
-                            {%for comment in comments %}
-                            {% if user.id == comment.author_name_id %}
-                            <div class="review_item">
-                                <div class="media">
-                                    <div class="d-flex">
-                                        {% if user.photo %}
-                                        <img src="{{user.photo.url}}" alt="" width="50" height="50">
-                                        {%else%}
-                                        <img src="{% static 'img/no_photo.png' %}" alt="" width="50" height="50">
-                                        {%endif%}
-                                    </div>
-
-                                    <div class="media-body">
-                                        {%if user.first_name%}
-                                        <h4>{{user.first_name}} {{user.last_name}}</h4>
-                                        {%else%}
-                                        <h4>{{user.username}}</h4>
-                                        {%endif%}
-
-                                        <h5>{{comment.date|date:'d.m.Y '}}</h5>
+                                        <div class="col-lg-6" id="div-body-box"></div>
                                     </div>
                                 </div>
-<!--                                <p>{{comment.quality}}</p>-->
-                                <p>{{comment.comment}}</p>
                             </div>
-                            {%endif%}
-                            {%endfor%}
-                            {%endfor%}
                         </div>
-                    </div>
 
-
-
-                </div>
-            </div>
+					</div>
+				</div>
         </div>
     </div>
 </section>

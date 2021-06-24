@@ -15,6 +15,45 @@ class PublishedBookManager(models.Manager):
         return super().get_queryset().filter(status='published')
 
 
+# ------------CART--------------
+class Order(models.Model):
+    user = models.ForeignKey('User', verbose_name='Заказчик', on_delete=models.CASCADE)
+    book = models.ManyToManyField('OrderBook')
+    start_date = models.DateTimeField(auto_now_add=True)
+    ordered_date = models.DateTimeField()
+    ordered = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = 'Заказ'
+        verbose_name_plural = 'SHOP-Заказы'
+
+    def __str__(self):
+        return self.user.username
+
+
+class OrderBook(models.Model):
+    user = models.ForeignKey('User', verbose_name='Заказчик', on_delete=models.CASCADE)
+    ordered = models.BooleanField(default=False)
+    book = models.ForeignKey('Book', verbose_name='Книга', on_delete=models.CASCADE)
+    quantity = models.IntegerField(default=1)
+
+    class Meta:
+        verbose_name = 'Список книг в заказе'
+        verbose_name_plural = 'SHOP-Список книг в заказе'
+
+    def __str__(self):
+        return self.user.username
+
+
+
+
+
+
+
+
+
+
+
 # ------------USER--------------
 class User(AbstractUser):
     AUTHOR_STATUS = [
@@ -38,9 +77,6 @@ class User(AbstractUser):
         return reverse('profile', args=[self.slug])
 
 
-# class UserBookListPreference(models.Model):
-#     user = models.OneToOneField('User', verbose_name='Книги', blank=True)
-#     book = models.ManyToManyField('Book', verbose_name='Книги', blank=True)
 # ------------SHOP--------------
 class Book(models.Model):
     STATUS_CHOICE = (
@@ -287,3 +323,6 @@ class CommentsNews(models.Model):
 
     def __str__(self):
         return self.comment
+
+
+

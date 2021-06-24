@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import News, Category, CommentsAuthor, User, AuthorInfo, CommentsNews, Writer, \
-    Book, Publisher, Genre, CommentsWriter, CommentsBook
+    Book, Publisher, Genre, CommentsWriter, CommentsBook, OrderBook, Order
 
 
 # ------------USER--------------
@@ -48,17 +48,18 @@ class CommentsWriterAdmin(admin.ModelAdmin):
     ordering = ('-date',)
 
 
-# @admin.register(CommentsBook)
-# class CommentsBookAdmin(admin.ModelAdmin):
-#     list_display = ('author_name', )
-#     search_fields = ('book', 'comment')
-#     ordering = ('-date',)
+@admin.register(CommentsBook)
+class CommentsBookAdmin(admin.ModelAdmin):
+    list_display = ('author_name', )
+    search_fields = ('book', 'comment')
+    ordering = ('-date',)
 
 
 admin.site.register(Genre)
-
-admin.site.register(CommentsBook)
-
+#
+# admin.site.register(CommentsBook)
+admin.site.register(Order)
+admin.site.register(OrderBook)
 
 # ------------BLOG--------------
 @admin.register(AuthorInfo)

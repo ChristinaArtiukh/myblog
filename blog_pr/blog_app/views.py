@@ -1,23 +1,26 @@
 from django.core import serializers
 from django.db.models import Count, Max, Min, Avg
 from django.db.models import Q
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse, HttpRequest, HttpResponse
 from django.contrib import messages
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, DetailView, UpdateView
 from django.views.generic.base import View, TemplateView
 from django.views.generic.edit import FormMixin
 from django_filters.views import FilterView
-from .filters import BookFilter
+from .filters import BookFilterSidebar
 from .serializers import BookSerializer
 from .forms import AddCommentsAuthorForm, AddCommentsNewsForm, LoginUserForm, RegisteredUserForm, CreateAuthorForm, \
     UserAddInfoForm, UpdateUserForm, UpdateAuthorForm, AddNewsForm, UpdateNewsForm, ChangeStatusNewsForm, \
     CommentsBookForm, CommentsWriterForm
 from .models import News, Category, CommentsNews, User, AuthorInfo, CommentsAuthor, Book, Writer, Publisher,\
-    Genre, CommentsBook, CommentsWriter
+    Genre, CommentsBook, CommentsWriter, Order, OrderBook
 from django.contrib.auth import login, logout
 
+
+
+# Тест
 
 # Фильтры
 
@@ -40,7 +43,6 @@ def shop_search(request):
 
     if is_valid_queryparam(title_or_writer_query):
         qs = qs.filter(Q(title__icontains=title_or_writer_query) | Q(writer__writer_name__icontains=title_or_writer_query))
-
     return qs
 
 
@@ -62,13 +64,23 @@ class HomeViews(ListView):
         return context
 
 
+# ------------CART--------------
+
+def list_book(request):
+    context = {
+        'catalog': Book.published.all()
+    }
+    return render(request, 'shop/cart/list_book.html', context)
+
+
 # ------------SHOP--------------
 class CatalogBookListView(FilterView, ListView):
     model = Book
     template_name = 'shop/book/catalog.html'
     context_object_name = 'catalog'
     paginate_by = 6
-    filterset_class = BookFilter
+    filterset_class = BookFilterSidebar
+
 
     def get_context_data(self, **kwargs):
         context = super(CatalogBookListView, self).get_context_data()
@@ -81,21 +93,21 @@ class CatalogBookListView(FilterView, ListView):
         context['publisher_count'] = Publisher.objects.annotate(count=Count('book')).filter(count__gt=0)
         context['high_price'] = Book.published.all().values('price',).aggregate(max=Max('price'))
         context['low_price'] = Book.published.all().values('price',).aggregate(min=Min('price'))
+
+        context['ordering_low_price'] = Book.published.all().values('price').order_by('price').distinct()
+        context['ordering_high_price'] = Book.published.all().values('price').order_by('-price').distinct()
+        context['ordering_id'] = Book.published.all().values('id').order_by('-id').distinct()
+
         context['publisher_filter'] = Book.published.all().values('publisher__publisher_name').order_by('publisher__publisher_name').distinct()
         context['writer_filter'] = Book.published.all().values('writer__writer_name').order_by('writer__writer_name').distinct()
         context['genre_filter'] = Book.published.all().values('genre__genre_name').order_by('genre__genre_name').distinct()
         return context
 
-    def get_ordering(self):
-        ordering = self.request.GET.get('orderby')
-        return ordering
-    
-    # def get_queryset(self):
-    #     qs = shop_search(self.request)
-    #     return qs
+    def get_queryset(self):
+        qs = shop_search(self.request)
+        return qs
 
-
-class BookDetailView(FormMixin, DetailView):
+class BookDetailView(DetailView):
     model = Book
     template_name = 'shop/book/book.html'
     context_object_name = 'book'
@@ -125,16 +137,6 @@ class BookDetailView(FormMixin, DetailView):
             else:
                 form = CommentsBookForm()
         return render(request, 'shop/book/book.html', {'form': form})
-
-
-class AddCommentBook(View):
-
-    def get(self, request):
-        qs = Book.objects.all()
-        data = serializers.serialize('json', qs)
-        return JsonResponse({'data': data}, safe=False)
-
-
 
 
 class WritersListView(ListView):
@@ -388,7 +390,7 @@ def add_profile_info(request):
                 form_one.save(commit=False)
                 form_one.photo = request.FILES['photo']
                 form_one.save()
-            return redirect('profile')
+                return redirect('profile')
         else:
             form_one = UserAddInfoForm()
         return render(request, 'user/create_info_page.html', {'form_one': form_one})
